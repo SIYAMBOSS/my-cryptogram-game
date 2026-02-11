@@ -3,156 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Battle Hub Pro</title>
+    <title>Sadaf Battle Hub Pro - Ultimate Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; --card: #111; --x-color: #ff0055; --gold: #ffcc00; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+        :root { --neon: #00f2ff; --bg: #050505; --card: #151515; --x-color: #ff0055; --gold: #ffcc00; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; padding-bottom: 50px; }
         
-        h1 { color: var(--neon); text-shadow: 0 0 15px var(--neon); margin: 5px 0; font-size: 1.8rem; text-transform: uppercase; }
-        .stats { display: flex; gap: 15px; font-size: 0.9rem; color: #ccc; margin-bottom: 10px; }
+        /* Top Bar */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 400px; margin-top: 20px; }
+        .points-display { color: var(--gold); font-weight: bold; font-size: 1.3rem; text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
+        
+        /* Icon Shop */
+        .shop-container { display: flex; gap: 12px; margin: 20px 0; padding: 10px; background: var(--card); border-radius: 20px; border: 1px solid #333; overflow-x: auto; width: 90%; max-width: 400px; scrollbar-width: none; }
+        .icon-item { min-width: 60px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; border-radius: 15px; border: 2px solid #222; cursor: pointer; transition: 0.3s; }
+        .icon-item.unlocked { border-color: var(--neon); }
+        .icon-item.active { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+        .icon-item.locked { opacity: 0.3; cursor: not-allowed; }
+        .price-tag { font-size: 0.65rem; margin-top: 5px; color: var(--gold); font-weight: bold; }
 
-        /* Level Selection Styles from Screenshot */
-        .level-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 300px; margin-bottom: 15px; }
-        .lvl-btn { padding: 10px; border: 2px solid #333; background: transparent; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.3s; }
+        /* Level Selector */
+        .level-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 320px; margin-bottom: 15px; }
+        .lvl-btn { padding: 12px; border: 1.5px solid #333; background: transparent; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.3s; }
         .lvl-btn.active { background: var(--neon); color: black; border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
-        .lvl-btn.pvp-btn { border-color: var(--gold); color: var(--gold); }
-        .lvl-btn.pvp-btn.active { background: var(--gold); color: black; }
 
-        .timer { font-size: 1.5rem; color: var(--x-color); font-weight: bold; margin-bottom: 5px; }
-
-        /* 5x5 Grid Styles */
-        .grid-container { padding: 8px; border: 3px solid var(--neon); border-radius: 15px; background: #000; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
-        .grid { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 5px; }
-        .cell { width: 55px; height: 55px; background: var(--card); border: 1px solid #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        /* Game Board */
+        .grid-container { position: relative; padding: 12px; border: 3.5px solid var(--neon); border-radius: 25px; background: #000; box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); }
+        .grid { display: grid; grid-template-columns: repeat(5, 58px); grid-template-rows: repeat(5, 58px); gap: 6px; }
+        .cell { width: 58px; height: 58px; background: var(--card); border: 1px solid #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .cell.O { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         .cell.X { color: var(--x-color); text-shadow: 0 0 10px var(--x-color); }
+        
+        #lineCanvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 5; }
 
-        .btn-restart { margin-top: 20px; padding: 10px 40px; background: transparent; border: 2px solid var(--neon); border-radius: 30px; color: var(--neon); font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        /* Spin Wheel UI */
+        #chest-trigger { position: fixed; right: 20px; bottom: 30px; font-size: 3rem; cursor: pointer; animation: bounce 2s infinite; z-index: 100; filter: drop-shadow(0 0 10px var(--gold)); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .spin-box { background: #111; border: 3px solid var(--gold); padding: 40px; border-radius: 30px; text-align: center; width: 80%; max-width: 350px; }
+        #wheel { width: 220px; height: 220px; border: 8px solid var(--gold); border-radius: 50%; margin: 20px auto; position: relative; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); background: conic-gradient(#333 0 60deg, #222 60deg 120deg, #333 120deg 180deg, #222 180deg 240deg, #333 240deg 300deg, #222 300deg 360deg); }
+        .wheel-marker { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 2rem; color: var(--gold); z-index: 10; }
+
+        .btn-restart { margin-top: 25px; padding: 12px 40px; background: transparent; border: 2px solid var(--neon); border-radius: 35px; color: var(--neon); font-weight: bold; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <h1>BATTLE HUB 🎮</h1>
-    <div class="stats">
-        <span>Streak: <span id="streak">0</span></span>
-        <span>Best: <span id="best">0</span></span>
+    <div class="top-bar">
+        <h1>BATTLE HUB 🎮</h1>
+        <div class="points-display">🪙 <span id="total-points">0</span></div>
     </div>
+
+    <div class="shop-container" id="shop"></div>
 
     <div class="level-selector">
         <button class="lvl-btn active" onclick="setLevel('easy', this)">Easy AI</button>
-        <button class="lvl-btn" onclick="setLevel('normal', this)">Normal AI</button>
         <button class="lvl-btn" onclick="setLevel('hard', this)">Hard AI</button>
-        <button class="lvl-btn pvp-btn" onclick="setLevel('pvp', this)">2 Players</button>
     </div>
 
-    <div class="timer" id="timer">20s</div>
-    <div id="status" style="margin-bottom:10px;">Player O Turn</div>
+    <div id="status" style="margin-bottom:15px; font-size: 1.1rem;">Player O Turn</div>
 
     <div class="grid-container">
         <div class="grid" id="board"></div>
+        <canvas id="lineCanvas"></canvas>
     </div>
 
     <button class="btn-restart" onclick="resetGame()">Restart Game</button>
 
+    <div id="chest-trigger" onclick="openSpinWheel()">🎁</div>
+    <div id="spin-overlay" class="overlay">
+        <div class="spin-box">
+            <h2 style="color:var(--gold)">Lucky Spin</h2>
+            <div class="wheel-marker">▼</div>
+            <div id="wheel"></div>
+            <button class="btn-restart" id="spin-btn" onclick="startSpin()">SPIN</button>
+            <p id="spin-timer" style="margin-top:15px; color:#888; font-size:0.8rem;"></p>
+            <button onclick="closeSpinWheel()" style="background:none; border:none; color:#555; margin-top:15px; cursor:pointer;">Close</button>
+        </div>
+    </div>
+
     <script>
+        // Data Persistence
+        let points = parseInt(localStorage.getItem('sadaf_points')) || 0;
+        let unlockedIcons = JSON.parse(localStorage.getItem('sadaf_unlocked')) || ['O'];
+        let activeIcon = localStorage.getItem('sadaf_active_icon') || 'O';
+        let lastSpin = localStorage.getItem('sadaf_last_spin') || 0;
+
+        const shopIcons = [
+            {char: 'O', price: 0}, {char: '🔥', price: 100}, {char: '⚡', price: 200},
+            {char: '❄️', price: 300}, {char: '💎', price: 400}, {char: '👑', price: 500}
+        ];
+
         let board = Array(25).fill(null);
         let gameActive = true;
         let difficulty = 'easy';
-        let currentPlayer = 'O';
-        let timeLeft = 20;
-        let timerId = null;
 
-        function setLevel(lvl, btn) {
-            difficulty = lvl;
-            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            resetGame();
+        function updateUI() {
+            document.getElementById('total-points').innerText = points;
+            renderShop();
+            checkSpinAvailability();
         }
 
-        function startTimer() {
-            clearInterval(timerId);
-            timeLeft = 20;
-            document.getElementById('timer').innerText = timeLeft + "s";
-            timerId = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer').innerText = timeLeft + "s";
-                if(timeLeft <= 0) {
-                    clearInterval(timerId);
-                    if(gameActive) {
-                        document.getElementById('status').innerText = "Time Out!";
-                        gameActive = false;
+        function renderShop() {
+            const shop = document.getElementById('shop');
+            shop.innerHTML = '';
+            shopIcons.forEach(item => {
+                const isUnlocked = unlockedIcons.includes(item.char);
+                const canAfford = points >= item.price;
+                const div = document.createElement('div');
+                div.className = `icon-item ${isUnlocked ? 'unlocked' : (canAfford ? '' : 'locked')} ${activeIcon === item.char ? 'active' : ''}`;
+                div.innerHTML = `<span>${item.char}</span><span class="price-tag">${isUnlocked ? 'GET' : item.price}</span>`;
+                div.onclick = () => {
+                    if(isUnlocked) { activeIcon = item.char; localStorage.setItem('sadaf_active_icon', activeIcon); }
+                    else if(canAfford) {
+                        points -= item.price; unlockedIcons.push(item.char); activeIcon = item.char;
+                        localStorage.setItem('sadaf_points', points);
+                        localStorage.setItem('sadaf_unlocked', JSON.stringify(unlockedIcons));
+                        localStorage.setItem('sadaf_active_icon', activeIcon);
+                        confetti();
                     }
-                }
-            }, 1000);
+                    updateUI();
+                };
+                shop.appendChild(div);
+            });
         }
 
+        // Spin Wheel Logic
+        function openSpinWheel() { document.getElementById('spin-overlay').style.display = 'flex'; }
+        function closeSpinWheel() { document.getElementById('spin-overlay').style.display = 'none'; }
+
+        function checkSpinAvailability() {
+            const now = Date.now();
+            const wait = 24 * 60 * 60 * 1000; // 24 Hours
+            const remaining = wait - (now - lastSpin);
+            const btn = document.getElementById('spin-btn');
+            if(remaining > 0) {
+                btn.disabled = true;
+                btn.innerText = "LOCKED";
+                document.getElementById('spin-timer').innerText = "Next spin in: " + Math.ceil(remaining/3600000) + "h";
+            } else {
+                btn.disabled = false;
+                btn.innerText = "SPIN";
+                document.getElementById('spin-timer').innerText = "Available Now!";
+            }
+        }
+
+        function startSpin() {
+            const wheel = document.getElementById('wheel');
+            const randomDeg = Math.floor(3000 + Math.random() * 3000);
+            wheel.style.transform = `rotate(${randomDeg}deg)`;
+            document.getElementById('spin-btn').disabled = true;
+
+            setTimeout(() => {
+                const rewards = [50, 10, 100, 20, 5, 30];
+                const prize = rewards[Math.floor((randomDeg % 360) / 60)];
+                points += prize;
+                lastSpin = Date.now();
+                localStorage.setItem('sadaf_points', points);
+                localStorage.setItem('sadaf_last_spin', lastSpin);
+                updateUI();
+                alert(`You won ${prize} points!`);
+                confetti();
+            }, 4000);
+        }
+
+        // Game Core
         function initBoard() {
             const boardEl = document.getElementById('board');
-            boardEl.innerHTML = '';
-            board = Array(25).fill(null);
+            boardEl.innerHTML = ''; board = Array(25).fill(null);
             for(let i=0; i<25; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.addEventListener('click', () => makeMove(i));
+                cell.onclick = () => playerMove(i);
                 boardEl.appendChild(cell);
             }
-            startTimer();
         }
 
-        function makeMove(i) {
-            if(board[i] || !gameActive) return;
-            board[i] = currentPlayer;
+        function playerMove(i) {
+            if(!gameActive || board[i]) return;
+            board[i] = activeIcon;
             render();
-            
-            if(checkWin(board, currentPlayer)) {
-                document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`;
-                if(currentPlayer === 'O') confetti();
-                gameActive = false;
-                clearInterval(timerId);
-            } else if(board.every(c => c !== null)) {
-                document.getElementById('status').innerText = "Draw!";
-                gameActive = false;
-                clearInterval(timerId);
+            if(checkWin(board, activeIcon)) {
+                points += 5; //
+                localStorage.setItem('sadaf_points', points);
+                endGame("WIN! +5 Points");
             } else {
-                if(difficulty === 'pvp') {
-                    currentPlayer = currentPlayer === 'O' ? 'X' : 'O';
-                    document.getElementById('status').innerText = `Player ${currentPlayer} Turn`;
-                    startTimer();
-                } else {
-                    document.getElementById('status').innerText = "AI Thinking...";
-                    clearInterval(timerId);
-                    setTimeout(aiMove, 600);
-                }
+                document.getElementById('status').innerText = "AI Thinking...";
+                setTimeout(aiMove, 600);
             }
         }
 
         function aiMove() {
+            if(!gameActive) return;
             let move = null;
-            // Super Hard Logic: Block user or Win
             if(difficulty === 'hard') {
-                move = findBestMove('X') || findBestMove('O') || smartPosition();
-            } else if(difficulty === 'normal') {
-                if(Math.random() > 0.5) move = findBestMove('X') || findBestMove('O');
+                move = findBestMove('X', 4) || findBestMove(activeIcon, 4) || 
+                       findBestMove('X', 3) || findBestMove(activeIcon, 3) || 12;
             }
-            
-            if(move === null) {
-                let available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-                move = available[Math.floor(Math.random() * available.length)];
+            if(move === null || board[move]) {
+                let free = board.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+                move = free[Math.floor(Math.random()*free.length)];
             }
-
             board[move] = 'X';
             render();
-            if(checkWin(board, 'X')) {
-                document.getElementById('status').innerText = "AI Wins!";
-                gameActive = false;
-            } else {
-                document.getElementById('status').innerText = "Player O Turn";
-                startTimer();
-            }
+            if(checkWin(board, 'X')) endGame("AI Wins!");
+            else document.getElementById('status').innerText = "Your Turn (" + activeIcon + ")";
+            updateUI();
         }
 
-        function findBestMove(p) {
+        function findBestMove(p, count) {
             for(let i=0; i<25; i++) {
                 if(board[i] === null) {
                     board[i] = p;
@@ -163,25 +222,7 @@
             return null;
         }
 
-        function smartPosition() {
-            // ৫x৫ গ্রিডে মাঝখানের ঘরগুলো (১২, ৭, ৮, ১৭, ১৮) গুরুত্বপূর্ণ
-            const priority = [12, 6, 7, 8, 11, 13, 16, 17, 18];
-            for(let p of priority) {
-                if(board[p] === null) return p;
-            }
-            return null;
-        }
-
-        function render() {
-            const cells = document.querySelectorAll('.cell');
-            board.forEach((val, i) => {
-                cells[i].innerText = val || "";
-                cells[i].className = `cell ${val || ''}`;
-            });
-        }
-
         function checkWin(b, p) {
-            // ৫x৫ গ্রিডে ৪টি গুটি মিললে জয় (Row, Col, Diag)
             for (let i = 0; i < 25; i++) {
                 if (b[i] !== p) continue;
                 let r = Math.floor(i / 5), c = i % 5;
@@ -193,14 +234,35 @@
             return false;
         }
 
+        function render() {
+            const cells = document.querySelectorAll('.cell');
+            board.forEach((v, i) => {
+                cells[i].innerText = v || '';
+                cells[i].className = `cell ${v === 'X' ? 'X' : (v ? 'O' : '')}`;
+            });
+        }
+
+        function setLevel(lvl, btn) {
+            difficulty = lvl;
+            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            resetGame();
+        }
+
+        function endGame(msg) {
+            gameActive = false;
+            document.getElementById('status').innerText = msg;
+            if(msg.includes("WIN")) confetti();
+            updateUI();
+        }
+
         function resetGame() {
             gameActive = true;
-            currentPlayer = 'O';
-            document.getElementById('status').innerText = "Player O Turn";
+            document.getElementById('status').innerText = "Your Turn";
             initBoard();
         }
 
-        window.onload = initBoard;
+        window.onload = () => { initBoard(); updateUI(); };
     </script>
 </body>
 </html>
