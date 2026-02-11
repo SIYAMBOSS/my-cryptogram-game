@@ -1,35 +1,130 @@
-<!DOCTYPE html>
+            
+            <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Hard AI Tic-Tac-Toe</title>
+    <title>Sadaf Ultimate AI Tic-Tac-Toe</title>
     <style>
-        :root { --neon: #00f2ff; --bg: #0a0a0a; --cell: #1a1a1a; --x-color: #ff0055; }
-        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: white; font-family: 'Arial', sans-serif; overflow: hidden; }
-        h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); margin: 10px 0; font-size: 1.8rem; }
-        .grid { display: grid; grid-template-columns: repeat(5, 60px); grid-template-rows: repeat(5, 60px); gap: 6px; padding: 12px; border: 3px solid var(--neon); border-radius: 15px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.3); background: #000; }
-        .cell { width: 60px; height: 60px; background: var(--cell); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; border: 1px solid #333; }
+        :root { 
+            --neon: #00f2ff; 
+            --bg: #0a0a0a; 
+            --cell: #1a1a1a; 
+            --x-color: #ff0055; 
+        }
+        body { 
+            background: var(--bg); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            color: white; 
+            font-family: 'Arial', sans-serif; 
+            overflow: hidden; 
+        }
+        h1 { 
+            color: var(--neon); 
+            text-shadow: 0 0 15px var(--neon); 
+            margin: 10px 0; 
+            font-size: 2rem; 
+        }
+        #status { 
+            margin: 15px 0; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            color: #ccc;
+            height: 30px;
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 60px); 
+            grid-template-rows: repeat(5, 60px); 
+            gap: 8px; 
+            padding: 15px; 
+            border: 3px solid var(--neon); 
+            border-radius: 15px; 
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); 
+            background: #000; 
+        }
+        .cell { 
+            width: 60px; 
+            height: 60px; 
+            background: var(--cell); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 10px; 
+            transition: 0.2s; 
+            border: 1px solid #333; 
+        }
         .cell:hover { background: #222; border-color: var(--neon); }
-        .cell.O { color: var(--neon); text-shadow: 0 0 15px var(--neon); }
-        .cell.X { color: var(--x-color); text-shadow: 0 0 15px var(--x-color); }
-        #status { margin: 15px 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: bold; height: 25px; }
-        .btn { padding: 12px 30px; background: none; border: 2px solid var(--neon); border-radius: 30px; color: var(--neon); font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+        .cell.O { color: var(--neon); text-shadow: 0 0 20px var(--neon); }
+        .cell.X { color: var(--x-color); text-shadow: 0 0 20px var(--x-color); }
+        
+        .btn { 
+            margin-top: 30px;
+            padding: 12px 35px; 
+            background: transparent; 
+            border: 2px solid var(--neon); 
+            border-radius: 30px; 
+            color: var(--neon); 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover { 
+            background: var(--neon); 
+            color: black; 
+            box-shadow: 0 0 25px var(--neon); 
+        }
     </style>
 </head>
 <body>
 
     <h1>BEAT THE AI 🤖</h1>
     <div id="status">Your Turn (O)</div>
+    
     <div class="grid" id="board"></div>
-    <button class="btn" style="margin-top: 25px;" onclick="resetGame()">Restart Battle</button>
+    
+    <button class="btn" onclick="resetGame()">Restart Battle</button>
 
     <script>
         const boardEl = document.getElementById('board');
         const statusEl = document.getElementById('status');
         let board = Array(25).fill(null);
         let gameActive = true;
+
+        // --- Sound Engine ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if(type === 'click') {
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } else if(type === 'win') {
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            } else if(type === 'loss') {
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.6);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+            }
+        }
 
         function createBoard() {
             boardEl.innerHTML = "";
@@ -43,9 +138,13 @@
 
         function makeMove(i) {
             if (!board[i] && gameActive) {
+                if(audioCtx.state === 'suspended') audioCtx.resume();
                 board[i] = "O";
+                playSfx('click');
                 render();
+                
                 if (checkWin(board, "O")) {
+                    playSfx('win');
                     statusEl.innerText = "YOU BEAT THE AI! 🏆";
                     gameActive = false;
                 } else if (board.every(cell => cell !== null)) {
@@ -53,34 +152,30 @@
                     gameActive = false;
                 } else {
                     statusEl.innerText = "AI IS ANALYZING...";
-                    setTimeout(aiMove, 400);
+                    setTimeout(aiMove, 500);
                 }
             }
         }
 
         function aiMove() {
             if (!gameActive) return;
+
+            // Intelligence: Win > Block > Center > Random
+            let move = findBestMove("X"); // Try to Win
+            if (move === null) move = findBestMove("O"); // Try to Block Player
+            if (move === null && !board[12]) move = 12; // Take Center
             
-            // AI Intelligence Logic:
-            // 1. Check if AI can win in next move
-            let move = findBestMove("X");
-            
-            // 2. If not, check if Player can win and block them
-            if (move === null) move = findBestMove("O");
-            
-            // 3. Take center if available
-            if (move === null && !board[12]) move = 12;
-            
-            // 4. Random available move
             if (move === null) {
                 let available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
                 move = available[Math.floor(Math.random() * available.length)];
             }
 
             board[move] = "X";
+            playSfx('click');
             render();
-            
+
             if (checkWin(board, "X")) {
+                playSfx('loss');
                 statusEl.innerText = "AI DOMINATED! 🤖";
                 gameActive = false;
             } else if (board.every(cell => cell !== null)) {
@@ -91,11 +186,11 @@
             }
         }
 
-        function findBestMove(player) {
+        function findBestMove(p) {
             for (let i = 0; i < 25; i++) {
                 if (board[i] === null) {
-                    board[i] = player;
-                    if (checkWin(board, player)) {
+                    board[i] = p;
+                    if (checkWin(board, p)) {
                         board[i] = null;
                         return i;
                     }
@@ -114,23 +209,15 @@
         }
 
         function checkWin(b, p) {
-            const size = 5;
-            const winLen = 4; // Video-তে ৪টা মিললে জিতছিল, আপনি চাইলে ৫-ও করতে পারেন
-
-            // Check Rows, Cols, and Diagonals
+            const winLen = 4; // 4 in a row to win
             for (let i = 0; i < 25; i++) {
                 if (b[i] !== p) continue;
-                
                 let r = Math.floor(i / 5), c = i % 5;
-
-                // Right
-                if (c <= size - winLen && b[i+1] === p && b[i+2] === p && b[i+3] === p) return true;
-                // Down
-                if (r <= size - winLen && b[i+5] === p && b[i+10] === p && b[i+15] === p) return true;
-                // Diag Right
-                if (r <= size - winLen && c <= size - winLen && b[i+6] === p && b[i+12] === p && b[i+18] === p) return true;
-                // Diag Left
-                if (r <= size - winLen && c >= winLen - 1 && b[i+4] === p && b[i+8] === p && b[i+12] === p) return true;
+                // Horiz, Vert, DiagR, DiagL
+                if (c <= 1 && b[i+1]===p && b[i+2]===p && b[i+3]===p) return true;
+                if (r <= 1 && b[i+5]===p && b[i+10]===p && b[i+15]===p) return true;
+                if (r <= 1 && c <= 1 && b[i+6]===p && b[i+12]===p && b[i+18]===p) return true;
+                if (r <= 1 && c >= 3 && b[i+4]===p && b[i+8]===p && b[i+12]===p) return true;
             }
             return false;
         }
