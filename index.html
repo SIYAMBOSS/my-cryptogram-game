@@ -1,277 +1,198 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Ultimate AI & Duo Battle</title>
+    <title>Sadaf Ultimate Game Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #0a0a0a; --cell: #1a1a1a; --x-color: #ff0055; }
-        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        :root { --neon: #00f2ff; --bg: #050505; --card: #111; --gold: #ffcc00; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .header { text-align: center; margin-bottom: 5px; }
-        h1 { color: var(--neon); text-shadow: 0 0 15px var(--neon); margin: 0; font-size: 1.8rem; }
+        /* Auth & Selection Screens */
+        .overlay { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .box { background: var(--card); padding: 30px; border-radius: 25px; border: 2px solid var(--neon); text-align: center; width: 85%; max-width: 400px; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); }
         
-        .stats { display: flex; gap: 20px; margin: 5px; font-size: 0.9rem; color: #aaa; }
-        .timer { font-size: 1.4rem; color: var(--x-color); font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 10px var(--x-color); }
+        .game-selection { display: none; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .game-card { width: 120px; height: 150px; background: #000; border: 2px solid #333; border-radius: 15px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .game-card:hover { border-color: var(--neon); transform: translateY(-5px); box-shadow: 0 0 20px var(--neon); }
+        .game-card span { margin-top: 10px; font-size: 0.8rem; font-weight: bold; }
+        .icon { font-size: 3rem; }
 
-        .level-selector { margin-bottom: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 280px; }
-        .lvl-btn { padding: 8px; border: 1px solid var(--neon); background: transparent; color: var(--neon); cursor: pointer; border-radius: 20px; transition: 0.3s; font-size: 0.75rem; font-weight: bold; }
-        .lvl-btn.active { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+        input { width: 85%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid var(--neon); background: #000; color: white; outline: none; }
+        .btn { background: var(--neon); color: black; padding: 12px 30px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-        .grid-container { position: relative; padding: 10px; border: 3px solid var(--neon); border-radius: 15px; background: #000; box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); }
-        .grid { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 6px; }
-        .cell { width: 55px; height: 55px; background: var(--cell); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #333; transition: 0.2s; position: relative; z-index: 2; }
-        .cell.O { color: var(--neon); text-shadow: 0 0 15px var(--neon); }
-        .cell.X { color: var(--x-color); text-shadow: 0 0 15px var(--x-color); }
-        
-        #lineCanvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 5; }
+        /* Main Game Hub Container */
+        #main-hub { display: none; width: 100%; height: 100vh; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
+        .back-btn { position: absolute; top: 20px; left: 20px; color: var(--neon); cursor: pointer; font-weight: bold; }
 
-        #status { margin: 10px 0; font-size: 1rem; font-weight: bold; height: 25px; letter-spacing: 1px; }
-        .btn-restart { padding: 10px 25px; background: transparent; border: 2px solid var(--neon); border-radius: 30px; color: var(--neon); font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 15px; }
-        .btn-restart:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+        /* Tic-Tac-Toe Super Hard */
+        .ttt-grid { display: grid; grid-template-columns: repeat(3, 80px); gap: 10px; margin-top: 20px; }
+        .cell { width: 80px; height: 80px; background: #111; border: 1px solid var(--neon); display: flex; align-items: center; justify-content: center; font-size: 2rem; border-radius: 10px; cursor: pointer; }
+
+        /* Ludo Board View */
+        .ludo-container { display: none; flex-direction: column; align-items: center; }
+        .board-mock { width: 300px; height: 300px; border: 4px solid #fff; display: grid; grid-template-columns: repeat(3, 1fr); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>BATTLE HUB 🎮</h1>
-        <div class="stats">
-            <span>Streak: <span id="streak">0</span></span>
-            <span>Best: <span id="best">0</span></span>
+    <div id="auth-screen" class="overlay">
+        <div class="box">
+            <h1 style="color:var(--neon); margin:0;">SADAF HUB</h1>
+            <p style="color:#666; font-size:0.8rem;">Professional AI Gaming Platform</p>
+            <input type="text" id="username" placeholder="Enter Your Battle Name">
+            <button class="btn" onclick="goToSelection()">LOGIN</button>
         </div>
     </div>
 
-    <div class="level-selector">
-        <button class="lvl-btn active" onclick="setLevel('easy', this)">Easy AI</button>
-        <button class="lvl-btn" onclick="setLevel('normal', this)">Normal AI</button>
-        <button class="lvl-btn" onclick="setLevel('hard', this)">Hard AI</button>
-        <button class="lvl-btn" style="border-color: #ffcc00; color: #ffcc00;" onclick="setLevel('pvp', this)">2 Players</button>
+    <div id="selection-screen" class="overlay" style="display:none;">
+        <h2 style="margin-bottom:30px;">Choose Your Battle</h2>
+        <div class="game-selection" style="display:flex;">
+            <div class="game-card" onclick="startGame('ludo')">
+                <div class="icon">🎲</div>
+                <span>LUDO PRO</span>
+            </div>
+            <div class="game-card" onclick="startGame('ttt')">
+                <div class="icon">❌</div>
+                <span>TIC-TAC-TOE</span>
+            </div>
+        </div>
     </div>
 
-    <div class="timer" id="timer">20s</div>
-    <div id="status">Player O Turn</div>
+    <div id="main-hub">
+        <div class="back-btn" onclick="location.reload()">← EXIT</div>
+        <h2 id="game-title" style="color:var(--neon)"></h2>
+        
+        <div id="ttt-content" style="display:none; text-align:center;">
+            <div id="ttt-status">AI's Turn (Super Hard)</div>
+            <div class="ttt-grid" id="ttt-board"></div>
+            <div style="margin-top:20px; color:#666; font-size:0.8rem;">Mode: Impossible to Beat</div>
+        </div>
 
-    <div class="grid-container">
-        <div class="grid" id="board"></div>
-        <canvas id="lineCanvas"></canvas>
+        <div id="ludo-content" class="ludo-container">
+            <div class="board-mock" style="background: url('https://upload.wikimedia.org/wikipedia/commons/a/ad/Ludo_board.svg') no-repeat center/cover;"></div>
+            <div style="margin-top:20px;">
+                <button class="btn" onclick="alert('Dice Logic Loading...')">ROLL DICE</button>
+            </div>
+        </div>
     </div>
-
-    <button class="btn-restart" onclick="resetGame()">Restart Game</button>
 
     <script>
-        const boardEl = document.getElementById('board');
-        const statusEl = document.getElementById('status');
-        const timerEl = document.getElementById('timer');
-        const canvas = document.getElementById('lineCanvas');
-        const ctx = canvas.getContext('2d');
+        let currentUser = "";
+        let board = Array(9).fill(null);
 
-        let board = Array(25).fill(null);
-        let gameActive = true;
-        let difficulty = 'easy';
-        let currentPlayer = "O";
-        let timeLeft = 20;
-        let timerId = null;
-        let streak = 0;
-        let bestStreak = localStorage.getItem('sadafBest') || 0;
-
-        document.getElementById('best').innerText = bestStreak;
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSfx(type) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            if(type==='click') { osc.frequency.setValueAtTime(800, audioCtx.currentTime); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.05); }
-            else if(type==='win') { osc.frequency.setValueAtTime(500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.5); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.5); }
-            else if(type==='loss') { osc.frequency.setValueAtTime(150, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.6); }
+        function goToSelection() {
+            const name = document.getElementById('username').value;
+            if(!name) return alert("Name is required!");
+            currentUser = name;
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'flex';
         }
 
-        function setLevel(lvl, btn) {
-            difficulty = lvl;
-            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            resetGame();
+        function startGame(type) {
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('main-hub').style.display = 'flex';
+            
+            if(type === 'ttt') {
+                document.getElementById('game-title').innerText = "TTT: vs Super AI";
+                document.getElementById('ttt-content').style.display = 'block';
+                initTTT();
+            } else {
+                document.getElementById('game-title').innerText = "Ludo: Sadaf Edition";
+                document.getElementById('ludo-content').style.display = 'flex';
+            }
         }
 
-        function startTimer() {
-            clearInterval(timerId);
-            timeLeft = 20;
-            timerEl.innerText = timeLeft + "s";
-            timerId = setInterval(() => {
-                timeLeft--;
-                timerEl.innerText = timeLeft + "s";
-                if(timeLeft <= 0) {
-                    clearInterval(timerId);
-                    if(gameActive) {
-                        let winner = (currentPlayer === "O") ? "X" : "O";
-                        statusEl.innerText = `Time Out! Winner: ${winner}`;
-                        gameActive = false;
-                        playSfx('loss');
-                        if(difficulty !== 'pvp') resetStreak();
-                    }
-                }
-            }, 1000);
+        // Tic Tac Toe Super Hard AI (Minimax)
+        function initTTT() {
+            const container = document.getElementById('ttt-board');
+            container.innerHTML = '';
+            board = Array(9).fill(null);
+            for(let i=0; i<9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.onclick = () => playerMove(i);
+                container.appendChild(cell);
+            }
         }
 
-        function createBoard() {
-            boardEl.innerHTML = "";
-            canvas.width = boardEl.offsetWidth;
-            canvas.height = boardEl.offsetHeight;
-            board.forEach((_, i) => {
-                const div = document.createElement('div');
-                div.classList.add('cell');
-                div.addEventListener('click', () => makeMove(i));
-                boardEl.appendChild(div);
-            });
-            startTimer();
-        }
-
-        function makeMove(i) {
-            if (!board[i] && gameActive) {
-                if(audioCtx.state === 'suspended') audioCtx.resume();
-                if(window.navigator.vibrate) window.navigator.vibrate(20);
-                
-                board[i] = currentPlayer;
-                playSfx('click');
-                render();
-                
-                let win = checkWin(board, currentPlayer);
-                if (win) {
-                    endGame(currentPlayer === "O" ? "win" : "loss", win);
-                } else if (board.every(c => c !== null)) {
-                    endGame("draw");
-                } else {
-                    if (difficulty === 'pvp') {
-                        currentPlayer = (currentPlayer === "O") ? "X" : "O";
-                        statusEl.innerText = `Player ${currentPlayer} Turn`;
-                        startTimer();
-                    } else {
-                        statusEl.innerText = "AI THINKING...";
-                        clearInterval(timerId);
-                        setTimeout(aiMove, 600);
-                    }
-                }
+        function playerMove(i) {
+            if(board[i] || checkWin(board)) return;
+            board[i] = 'O';
+            updateBoard();
+            if(!checkWin(board)) {
+                setTimeout(aiMove, 500);
             }
         }
 
         function aiMove() {
-            if (!gameActive) return;
-            let move = null;
-            if (difficulty === 'hard') {
-                move = findBestMove("X") || findBestMove("O") || (board[12] === null ? 12 : null);
-            } else if (difficulty === 'normal') {
-                if (Math.random() > 0.4) move = findBestMove("X") || findBestMove("O");
-            }
-            if (move === null) {
-                let available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-                move = available[Math.floor(Math.random() * available.length)];
-            }
-
-            board[move] = "X";
-            playSfx('click');
-            render();
-
-            let win = checkWin(board, "X");
-            if (win) {
-                endGame("loss", win);
-            } else if (board.every(c => c !== null)) {
-                endGame("draw");
-            } else {
-                statusEl.innerText = "Player O Turn";
-                startTimer();
-            }
-        }
-
-        function findBestMove(p) {
-            for (let i = 0; i < 25; i++) {
-                if (board[i] === null) {
-                    board[i] = p;
-                    if (checkWin(board, p)) { board[i] = null; return i; }
+            let bestScore = -Infinity;
+            let move;
+            for(let i=0; i<9; i++) {
+                if(board[i] === null) {
+                    board[i] = 'X';
+                    let score = minimax(board, 0, false);
                     board[i] = null;
-                }
-            }
-            return null;
-        }
-
-        function drawWinLine(indices) {
-            const cells = document.querySelectorAll('.cell');
-            const start = cells[indices[0]].getBoundingClientRect();
-            const end = cells[indices[3]].getBoundingClientRect();
-            const gridRect = boardEl.getBoundingClientRect();
-            ctx.beginPath();
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = "#00f2ff";
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "#00f2ff";
-            ctx.moveTo(start.left - gridRect.left + 27, start.top - gridRect.top + 27);
-            ctx.lineTo(end.left - gridRect.left + 27, end.top - gridRect.top + 27);
-            ctx.stroke();
-        }
-
-        function endGame(result, winIndices) {
-            gameActive = false;
-            clearInterval(timerId);
-            if(result === "win") {
-                statusEl.innerText = difficulty === 'pvp' ? "PLAYER O WINS! 🎉" : "YOU DOMINATED! 🎉";
-                playSfx('win');
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                if(difficulty !== 'pvp') {
-                    streak++;
-                    if(streak > bestStreak) {
-                        bestStreak = streak;
-                        localStorage.setItem('sadafBest', bestStreak);
-                        document.getElementById('best').innerText = bestStreak;
+                    if(score > bestScore) {
+                        bestScore = score;
+                        move = i;
                     }
-                    document.getElementById('streak').innerText = streak;
                 }
-            } else if(result === "loss") {
-                statusEl.innerText = difficulty === 'pvp' ? "PLAYER X WINS! 🏆" : "AI DEFEATED YOU! 🤖";
-                playSfx(difficulty === 'pvp' ? 'win' : 'loss');
-                if(difficulty === 'pvp') confetti({ particleCount: 150, spread: 70, colors:['#ff0055'] });
-                else resetStreak();
-            } else {
-                statusEl.innerText = "STALEMATE! 🤝";
             }
-            if(winIndices) drawWinLine(winIndices);
+            board[move] = 'X';
+            updateBoard();
         }
 
-        function resetStreak() {
-            streak = 0;
-            document.getElementById('streak').innerText = streak;
+        function minimax(currBoard, depth, isMaximizing) {
+            let res = checkWin(currBoard);
+            if(res === 'X') return 10;
+            if(res === 'O') return -10;
+            if(currBoard.every(c => c !== null)) return 0;
+
+            if(isMaximizing) {
+                let bestScore = -Infinity;
+                for(let i=0; i<9; i++) {
+                    if(currBoard[i] === null) {
+                        currBoard[i] = 'X';
+                        let score = minimax(currBoard, depth+1, false);
+                        currBoard[i] = null;
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for(let i=0; i<9; i++) {
+                    if(currBoard[i] === null) {
+                        currBoard[i] = 'O';
+                        let score = minimax(currBoard, depth+1, true);
+                        currBoard[i] = null;
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
         }
 
-        function render() {
+        function updateBoard() {
             const cells = document.querySelectorAll('.cell');
-            board.forEach((v, i) => {
-                cells[i].innerText = v || "";
-                cells[i].className = "cell" + (v ? " " + v : "");
-            });
+            board.forEach((val, i) => cells[i].innerText = val);
+            let win = checkWin(board);
+            if(win) {
+                document.getElementById('ttt-status').innerText = win === 'X' ? "AI Won! Better luck next time." : "You Won!";
+            } else if(board.every(c => c !== null)) {
+                document.getElementById('ttt-status').innerText = "It's a Draw!";
+            }
         }
 
-        function checkWin(b, p) {
-            for (let i = 0; i < 25; i++) {
-                if (b[i] !== p) continue;
-                let r = Math.floor(i / 5), c = i % 5;
-                if (c <= 1 && b[i+1]===p && b[i+2]===p && b[i+3]===p) return [i, i+1, i+2, i+3];
-                if (r <= 1 && b[i+5]===p && b[i+10]===p && b[i+15]===p) return [i, i+5, i+10, i+15];
-                if (r <= 1 && c <= 1 && b[i+6]===p && b[i+12]===p && b[i+18]===p) return [i, i+6, i+12, i+18];
-                if (r <= 1 && c >= 3 && b[i+4]===p && b[i+8]===p && b[i+12]===p) return [i, i+4, i+8, i+12];
+        function checkWin(b) {
+            const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for(let l of lines) {
+                if(b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return b[l[0]];
             }
             return null;
         }
-
-        function resetGame() {
-            board = Array(25).fill(null);
-            gameActive = true;
-            currentPlayer = "O";
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            statusEl.innerText = "Player O Turn";
-            render();
-            startTimer();
-        }
-
-        window.onload = createBoard;
     </script>
 </body>
 </html>
