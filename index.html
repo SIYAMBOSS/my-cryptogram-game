@@ -1,170 +1,168 @@
-            
-            <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Ultimate AI Tic-Tac-Toe</title>
+    <title>Sadaf Ultimate AI & Duo Battle</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { 
-            --neon: #00f2ff; 
-            --bg: #0a0a0a; 
-            --cell: #1a1a1a; 
-            --x-color: #ff0055; 
-        }
-        body { 
-            background: var(--bg); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            color: white; 
-            font-family: 'Arial', sans-serif; 
-            overflow: hidden; 
-        }
-        h1 { 
-            color: var(--neon); 
-            text-shadow: 0 0 15px var(--neon); 
-            margin: 10px 0; 
-            font-size: 2rem; 
-        }
-        #status { 
-            margin: 15px 0; 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            color: #ccc;
-            height: 30px;
-        }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(5, 60px); 
-            grid-template-rows: repeat(5, 60px); 
-            gap: 8px; 
-            padding: 15px; 
-            border: 3px solid var(--neon); 
-            border-radius: 15px; 
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); 
-            background: #000; 
-        }
-        .cell { 
-            width: 60px; 
-            height: 60px; 
-            background: var(--cell); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 30px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            border-radius: 10px; 
-            transition: 0.2s; 
-            border: 1px solid #333; 
-        }
-        .cell:hover { background: #222; border-color: var(--neon); }
-        .cell.O { color: var(--neon); text-shadow: 0 0 20px var(--neon); }
-        .cell.X { color: var(--x-color); text-shadow: 0 0 20px var(--x-color); }
+        :root { --neon: #00f2ff; --bg: #0a0a0a; --cell: #1a1a1a; --x-color: #ff0055; }
+        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         
-        .btn { 
-            margin-top: 30px;
-            padding: 12px 35px; 
-            background: transparent; 
-            border: 2px solid var(--neon); 
-            border-radius: 30px; 
-            color: var(--neon); 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .btn:hover { 
-            background: var(--neon); 
-            color: black; 
-            box-shadow: 0 0 25px var(--neon); 
-        }
+        .header { text-align: center; margin-bottom: 5px; }
+        h1 { color: var(--neon); text-shadow: 0 0 15px var(--neon); margin: 0; font-size: 1.8rem; }
+        
+        .stats { display: flex; gap: 20px; margin: 5px; font-size: 0.9rem; color: #aaa; }
+        .timer { font-size: 1.4rem; color: var(--x-color); font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 10px var(--x-color); }
+
+        .level-selector { margin-bottom: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 280px; }
+        .lvl-btn { padding: 8px; border: 1px solid var(--neon); background: transparent; color: var(--neon); cursor: pointer; border-radius: 20px; transition: 0.3s; font-size: 0.75rem; font-weight: bold; }
+        .lvl-btn.active { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+
+        .grid-container { position: relative; padding: 10px; border: 3px solid var(--neon); border-radius: 15px; background: #000; box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); }
+        .grid { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 6px; }
+        .cell { width: 55px; height: 55px; background: var(--cell); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #333; transition: 0.2s; position: relative; z-index: 2; }
+        .cell.O { color: var(--neon); text-shadow: 0 0 15px var(--neon); }
+        .cell.X { color: var(--x-color); text-shadow: 0 0 15px var(--x-color); }
+        
+        #lineCanvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 5; }
+
+        #status { margin: 10px 0; font-size: 1rem; font-weight: bold; height: 25px; letter-spacing: 1px; }
+        .btn-restart { padding: 10px 25px; background: transparent; border: 2px solid var(--neon); border-radius: 30px; color: var(--neon); font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 15px; }
+        .btn-restart:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
     </style>
 </head>
 <body>
 
-    <h1>BEAT THE AI 🤖</h1>
-    <div id="status">Your Turn (O)</div>
-    
-    <div class="grid" id="board"></div>
-    
-    <button class="btn" onclick="resetGame()">Restart Battle</button>
+    <div class="header">
+        <h1>BATTLE HUB 🎮</h1>
+        <div class="stats">
+            <span>Streak: <span id="streak">0</span></span>
+            <span>Best: <span id="best">0</span></span>
+        </div>
+    </div>
+
+    <div class="level-selector">
+        <button class="lvl-btn active" onclick="setLevel('easy', this)">Easy AI</button>
+        <button class="lvl-btn" onclick="setLevel('normal', this)">Normal AI</button>
+        <button class="lvl-btn" onclick="setLevel('hard', this)">Hard AI</button>
+        <button class="lvl-btn" style="border-color: #ffcc00; color: #ffcc00;" onclick="setLevel('pvp', this)">2 Players</button>
+    </div>
+
+    <div class="timer" id="timer">20s</div>
+    <div id="status">Player O Turn</div>
+
+    <div class="grid-container">
+        <div class="grid" id="board"></div>
+        <canvas id="lineCanvas"></canvas>
+    </div>
+
+    <button class="btn-restart" onclick="resetGame()">Restart Game</button>
 
     <script>
         const boardEl = document.getElementById('board');
         const statusEl = document.getElementById('status');
+        const timerEl = document.getElementById('timer');
+        const canvas = document.getElementById('lineCanvas');
+        const ctx = canvas.getContext('2d');
+
         let board = Array(25).fill(null);
         let gameActive = true;
+        let difficulty = 'easy';
+        let currentPlayer = "O";
+        let timeLeft = 20;
+        let timerId = null;
+        let streak = 0;
+        let bestStreak = localStorage.getItem('sadafBest') || 0;
 
-        // --- Sound Engine ---
+        document.getElementById('best').innerText = bestStreak;
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSfx(type) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if(type==='click') { osc.frequency.setValueAtTime(800, audioCtx.currentTime); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.05); }
+            else if(type==='win') { osc.frequency.setValueAtTime(500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.5); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.5); }
+            else if(type==='loss') { osc.frequency.setValueAtTime(150, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.6); }
+        }
 
-            if(type === 'click') {
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-            } else if(type === 'win') {
-                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.4);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-            } else if(type === 'loss') {
-                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.6);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.6);
-            }
+        function setLevel(lvl, btn) {
+            difficulty = lvl;
+            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            resetGame();
+        }
+
+        function startTimer() {
+            clearInterval(timerId);
+            timeLeft = 20;
+            timerEl.innerText = timeLeft + "s";
+            timerId = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft + "s";
+                if(timeLeft <= 0) {
+                    clearInterval(timerId);
+                    if(gameActive) {
+                        let winner = (currentPlayer === "O") ? "X" : "O";
+                        statusEl.innerText = `Time Out! Winner: ${winner}`;
+                        gameActive = false;
+                        playSfx('loss');
+                        if(difficulty !== 'pvp') resetStreak();
+                    }
+                }
+            }, 1000);
         }
 
         function createBoard() {
             boardEl.innerHTML = "";
+            canvas.width = boardEl.offsetWidth;
+            canvas.height = boardEl.offsetHeight;
             board.forEach((_, i) => {
                 const div = document.createElement('div');
                 div.classList.add('cell');
                 div.addEventListener('click', () => makeMove(i));
                 boardEl.appendChild(div);
             });
+            startTimer();
         }
 
         function makeMove(i) {
             if (!board[i] && gameActive) {
                 if(audioCtx.state === 'suspended') audioCtx.resume();
-                board[i] = "O";
+                if(window.navigator.vibrate) window.navigator.vibrate(20);
+                
+                board[i] = currentPlayer;
                 playSfx('click');
                 render();
                 
-                if (checkWin(board, "O")) {
-                    playSfx('win');
-                    statusEl.innerText = "YOU BEAT THE AI! 🏆";
-                    gameActive = false;
-                } else if (board.every(cell => cell !== null)) {
-                    statusEl.innerText = "IT'S A DRAW! 🤝";
-                    gameActive = false;
+                let win = checkWin(board, currentPlayer);
+                if (win) {
+                    endGame(currentPlayer === "O" ? "win" : "loss", win);
+                } else if (board.every(c => c !== null)) {
+                    endGame("draw");
                 } else {
-                    statusEl.innerText = "AI IS ANALYZING...";
-                    setTimeout(aiMove, 500);
+                    if (difficulty === 'pvp') {
+                        currentPlayer = (currentPlayer === "O") ? "X" : "O";
+                        statusEl.innerText = `Player ${currentPlayer} Turn`;
+                        startTimer();
+                    } else {
+                        statusEl.innerText = "AI THINKING...";
+                        clearInterval(timerId);
+                        setTimeout(aiMove, 600);
+                    }
                 }
             }
         }
 
         function aiMove() {
             if (!gameActive) return;
-
-            // Intelligence: Win > Block > Center > Random
-            let move = findBestMove("X"); // Try to Win
-            if (move === null) move = findBestMove("O"); // Try to Block Player
-            if (move === null && !board[12]) move = 12; // Take Center
-            
+            let move = null;
+            if (difficulty === 'hard') {
+                move = findBestMove("X") || findBestMove("O") || (board[12] === null ? 12 : null);
+            } else if (difficulty === 'normal') {
+                if (Math.random() > 0.4) move = findBestMove("X") || findBestMove("O");
+            }
             if (move === null) {
                 let available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
                 move = available[Math.floor(Math.random() * available.length)];
@@ -174,15 +172,14 @@
             playSfx('click');
             render();
 
-            if (checkWin(board, "X")) {
-                playSfx('loss');
-                statusEl.innerText = "AI DOMINATED! 🤖";
-                gameActive = false;
-            } else if (board.every(cell => cell !== null)) {
-                statusEl.innerText = "IT'S A DRAW! 🤝";
-                gameActive = false;
+            let win = checkWin(board, "X");
+            if (win) {
+                endGame("loss", win);
+            } else if (board.every(c => c !== null)) {
+                endGame("draw");
             } else {
-                statusEl.innerText = "Your Turn (O)";
+                statusEl.innerText = "Player O Turn";
+                startTimer();
             }
         }
 
@@ -190,14 +187,58 @@
             for (let i = 0; i < 25; i++) {
                 if (board[i] === null) {
                     board[i] = p;
-                    if (checkWin(board, p)) {
-                        board[i] = null;
-                        return i;
-                    }
+                    if (checkWin(board, p)) { board[i] = null; return i; }
                     board[i] = null;
                 }
             }
             return null;
+        }
+
+        function drawWinLine(indices) {
+            const cells = document.querySelectorAll('.cell');
+            const start = cells[indices[0]].getBoundingClientRect();
+            const end = cells[indices[3]].getBoundingClientRect();
+            const gridRect = boardEl.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "#00f2ff";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#00f2ff";
+            ctx.moveTo(start.left - gridRect.left + 27, start.top - gridRect.top + 27);
+            ctx.lineTo(end.left - gridRect.left + 27, end.top - gridRect.top + 27);
+            ctx.stroke();
+        }
+
+        function endGame(result, winIndices) {
+            gameActive = false;
+            clearInterval(timerId);
+            if(result === "win") {
+                statusEl.innerText = difficulty === 'pvp' ? "PLAYER O WINS! 🎉" : "YOU DOMINATED! 🎉";
+                playSfx('win');
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                if(difficulty !== 'pvp') {
+                    streak++;
+                    if(streak > bestStreak) {
+                        bestStreak = streak;
+                        localStorage.setItem('sadafBest', bestStreak);
+                        document.getElementById('best').innerText = bestStreak;
+                    }
+                    document.getElementById('streak').innerText = streak;
+                }
+            } else if(result === "loss") {
+                statusEl.innerText = difficulty === 'pvp' ? "PLAYER X WINS! 🏆" : "AI DEFEATED YOU! 🤖";
+                playSfx(difficulty === 'pvp' ? 'win' : 'loss');
+                if(difficulty === 'pvp') confetti({ particleCount: 150, spread: 70, colors:['#ff0055'] });
+                else resetStreak();
+            } else {
+                statusEl.innerText = "STALEMATE! 🤝";
+            }
+            if(winIndices) drawWinLine(winIndices);
+        }
+
+        function resetStreak() {
+            streak = 0;
+            document.getElementById('streak').innerText = streak;
         }
 
         function render() {
@@ -209,27 +250,28 @@
         }
 
         function checkWin(b, p) {
-            const winLen = 4; // 4 in a row to win
             for (let i = 0; i < 25; i++) {
                 if (b[i] !== p) continue;
                 let r = Math.floor(i / 5), c = i % 5;
-                // Horiz, Vert, DiagR, DiagL
-                if (c <= 1 && b[i+1]===p && b[i+2]===p && b[i+3]===p) return true;
-                if (r <= 1 && b[i+5]===p && b[i+10]===p && b[i+15]===p) return true;
-                if (r <= 1 && c <= 1 && b[i+6]===p && b[i+12]===p && b[i+18]===p) return true;
-                if (r <= 1 && c >= 3 && b[i+4]===p && b[i+8]===p && b[i+12]===p) return true;
+                if (c <= 1 && b[i+1]===p && b[i+2]===p && b[i+3]===p) return [i, i+1, i+2, i+3];
+                if (r <= 1 && b[i+5]===p && b[i+10]===p && b[i+15]===p) return [i, i+5, i+10, i+15];
+                if (r <= 1 && c <= 1 && b[i+6]===p && b[i+12]===p && b[i+18]===p) return [i, i+6, i+12, i+18];
+                if (r <= 1 && c >= 3 && b[i+4]===p && b[i+8]===p && b[i+12]===p) return [i, i+4, i+8, i+12];
             }
-            return false;
+            return null;
         }
 
         function resetGame() {
             board = Array(25).fill(null);
             gameActive = true;
-            statusEl.innerText = "Your Turn (O)";
+            currentPlayer = "O";
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            statusEl.innerText = "Player O Turn";
             render();
+            startTimer();
         }
 
-        createBoard();
+        window.onload = createBoard;
     </script>
 </body>
 </html>
