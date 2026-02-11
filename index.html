@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptogram Puzzle</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f8f0; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .grid { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .box-container { display: flex; flex-direction: column; align-items: center; }
+        .box { width: 40px; height: 40px; border: 2px solid #8b5a2b; border-radius: 5px; text-align: center; font-size: 20px; font-weight: bold; background: #fff; text-transform: uppercase; }
+        .number { font-size: 14px; margin-top: 5px; color: #333; }
+        .clue-section { background: #e0f2f1; padding: 15px; border-radius: 10px; width: 300px; }
+        h2 { color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+    <h2>Cryptogram: Reveal the Secret</h2>
+
+    <div class="grid" id="secret-word">
+        </div>
+
+    <hr style="width:100%">
+
+    <div class="clue-section">
+        <p><strong>Clue:</strong> Not a cat</p>
+        <div class="grid" id="clue-word"></div>
+    </div>
+
+    <script>
+        // Mapping: A=1, D=4, G=7, O=15 (Example)
+        const cipher = { 4: 'D', 15: 'O', 7: 'G' };
+        const secretNumbers = [4, 15, 7]; // DOG
+
+        function createGrid(containerId, numbers, editable = true) {
+            const container = document.getElementById(containerId);
+            numbers.forEach(num => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'box-container';
+                
+                const input = document.createElement('input');
+                input.className = 'box';
+                input.maxLength = 1;
+                input.dataset.num = num;
+
+                // Sync all boxes with same number
+                input.oninput = (e) => {
+                    const letter = e.target.value.toUpperCase();
+                    document.querySelectorAll(`input[data-num="${num}"]`).forEach(el => el.value = letter);
+                    checkWin();
+                };
+
+                const numLabel = document.createElement('div');
+                numLabel.className = 'number';
+                numLabel.innerText = num;
+
+                wrapper.appendChild(input);
+                wrapper.appendChild(numLabel);
+                container.appendChild(wrapper);
+            });
+        }
+
+        function checkWin() {
+            let won = true;
+            document.querySelectorAll('#secret-word .box').forEach(el => {
+                if (el.value !== cipher[el.dataset.num]) won = false;
+            });
+            if (won) alert("অভিনন্দন! আপনি জিতেছেন!");
+        }
+
+        createGrid('secret-word', secretNumbers);
+        createGrid('clue-word', secretNumbers);
+    </script>
+</body>
+</html>
