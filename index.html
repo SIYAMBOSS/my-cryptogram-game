@@ -2,124 +2,177 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1000+ Level Cryptogram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sadaf's Pro Game Hub</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #ecf0f1; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .header { background: white; width: 100%; max-width: 600px; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .grid { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
+        :root {
+            --wood: #3d2b1f;
+            --gold: #ffcc00;
+            --green: #2e7d32;
+        }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; }
+        
+        /* Home Screen */
+        #home-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            background-color: var(--wood);
+        }
+        .hub-title { font-size: 2.5rem; margin-bottom: 30px; color: var(--gold); text-shadow: 3px 3px 5px #000; }
+        .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 20px; width: 90%; max-width: 500px; }
+        .card {
+            background: rgba(255,255,255,0.1); border: 2px solid var(--gold); border-radius: 15px;
+            padding: 15px; text-align: center; cursor: pointer; transition: 0.3s;
+        }
+        .card:hover { transform: scale(1.05); background: rgba(255,255,255,0.2); }
+        .card img { width: 60px; height: 60px; margin-bottom: 10px; }
+
+        /* General Game Layout */
+        .game-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #222; }
+        .back-btn {
+            position: absolute; top: 15px; left: 15px; background: var(--gold);
+            color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 1000;
+        }
+
+        /* Cryptogram UI */
+        .crypto-ui { display: flex; flex-direction: center; flex-direction: column; align-items: center; padding-top: 70px; color: #a1ffaf; }
+        .grid { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 20px; }
         .box-unit { display: flex; flex-direction: column; align-items: center; }
-        .box { width: 42px; height: 42px; border: 2px solid var(--primary); border-radius: 8px; text-align: center; font-size: 22px; font-weight: bold; background: white; text-transform: uppercase; outline: none; }
-        .box:focus { border-color: var(--accent); background: #f7fbff; }
-        .num-label { font-size: 12px; margin-top: 4px; font-weight: bold; color: #555; }
-        .clue-card { background: #dff9fb; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; border-left: 5px solid var(--accent); }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 18px; cursor: pointer; margin-top: 20px; display: none; transition: 0.3s; }
-        .btn:hover { background: var(--accent); transform: scale(1.05); }
-        #lvl-tag { color: var(--accent); font-weight: bold; }
+        .box { width: 40px; height: 40px; border: 2px solid var(--gold); background: #fff; color: #000; text-align: center; font-size: 20px; font-weight: bold; border-radius: 5px; }
+        .num-label { font-size: 12px; margin-top: 4px; color: #fff; }
+
+        /* Canvas Styles */
+        canvas { display: block; margin: 0 auto; background: #333; border: 5px solid var(--wood); border-radius: 10px; max-width: 95%; max-height: 70vh; touch-action: none; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Word Master Cryptogram</h1>
-        <p>Solve the puzzle to reach next level!</p>
-        <div>Level: <span id="lvl-tag">1</span></div>
+    <div id="home-screen">
+        <h1 class="hub-title">Sadaf Game Store 🎮</h1>
+        <div class="menu">
+            <div class="card" onclick="startCrypto()">
+                <img src="https://cdn-icons-png.flaticon.com/512/2092/2092175.png">
+                <h3>Word Puzzle</h3>
+            </div>
+            <div class="card" onclick="startBlock()">
+                <img src="https://cdn-icons-png.flaticon.com/512/566/566312.png">
+                <h3>Block Crush</h3>
+            </div>
+            <div class="card" onclick="startTemple()">
+                <img src="https://cdn-icons-png.flaticon.com/512/1043/1043444.png">
+                <h3>Temple Run</h3>
+            </div>
+        </div>
     </div>
 
-    <div class="grid" id="main-grid"></div>
+    <div id="crypto-game" class="game-container" style="background: #1b5e20;">
+        <button class="back-btn" onclick="location.reload()">← Home</button>
+        <div class="crypto-ui">
+            <h2>Decrypt the Word</h2>
+            <div id="crypto-grid" class="grid"></div>
+            <h3 id="crypto-clue">Clue: ...</h3>
+            <button id="next-crypto" onclick="startCrypto()" style="display:none; padding:10px 20px; background:var(--gold); border:none; border-radius:5px; cursor:pointer;">Next Level</button>
+        </div>
+    </div>
 
-    <div class="clue-card">
-        <h3 id="clue-display">Loading...</h3>
-        <button class="btn" id="next-btn" onclick="startNewLevel()">Next Level ➔</button>
+    <div id="block-game" class="game-container" style="background: #3d2b1f;">
+        <button class="back-btn" onclick="location.reload()">← Home</button>
+        <div style="text-align:center; padding-top:60px;">
+            <h2 style="color:var(--gold)">Block Puzzle</h2>
+            <canvas id="blockCanvas"></canvas>
+            <p>Score: <span id="block-score">0</span></p>
+        </div>
+    </div>
+
+    <div id="temple-game" class="game-container">
+        <button class="back-btn" onclick="location.reload()">← Home</button>
+        <div style="text-align:center; padding-top:60px;">
+            <h2 style="color:gold">Temple Run Lite</h2>
+            <canvas id="templeCanvas"></canvas>
+            <p>Tap Left/Right to avoid obstacles!</p>
+        </div>
     </div>
 
     <script>
-        // ১০০০ শব্দের ডেটাবেস (এখানে স্যাম্পল দেওয়া হলো, আপনি আরও বাড়াতে পারেন)
-        const rawWords = [
-            "APPLE:A common red fruit", "BREAD:You eat this for breakfast", "CHAIR:Something to sit on",
-            "DREAM:Something you see while sleeping", "EARTH:The planet we live on", "FLOWER:Beautiful part of a plant",
-            "GUITAR:A musical instrument with strings", "HAPPY:The opposite of sad", "ISLAND:Land surrounded by water",
-            "JACKET:You wear this when it's cold", "KITCHEN:Where you cook food", "LEMON:A sour yellow fruit",
-            "MOUNTAIN:A very high hill", "NATURE:The natural physical world", "ORANGE:A fruit and a color",
-            "PIZZA:A popular Italian food", "QUEEN:A female ruler", "RIVER:Large natural stream of water",
-            "SMILE:What you do when you are happy", "TIGER:A large striped cat", "UMBRELLA:Protects you from rain",
-            "VALLEY:Low land between mountains", "WINDOW:You look through it", "YELLOW:The color of the sun",
-            "ZEBRA:A black and white striped animal", "BOTTLE:Used to hold water", "CAMERA:Takes photographs",
-            "DANGER:Not safe", "EAGLE:A powerful bird of prey", "FAMILY:People you live with",
-            "GARDEN:Where flowers grow", "HAMMER:A tool for nails", "INSECT:A small animal like a bee",
-            "JOURNEY:A long trip", "KETTLE:Used for boiling water", "LADDER:Used for climbing up",
-            "MIRROR:You see your reflection in it", "NUMBER:Used for counting", "OCEAN:Very large salty water",
-            "POCKET:Small bag in your pants", "RABBIT:An animal with long ears", "SILVER:A shiny metal",
-            "TABLET:Smaller than a laptop", "VILLAGE:A very small town", "WINTER:The coldest season",
-            // ... (এখানে ১০০০ শব্দ পর্যন্ত যোগ করা যাবে)
-        ];
-
-        // ১০০০ শব্দ পূর্ণ করতে লুপ দিয়ে কিছু ডামি শব্দ তৈরি করা হলো টেস্টের জন্য
-        for(let i=1; i<=950; i++) {
-            rawWords.push(`LEVEL${i}:Level number ${i} for practice`);
+        function hideAll() {
+            document.getElementById('home-screen').style.display = 'none';
+            document.querySelectorAll('.game-container').forEach(g => g.style.display = 'none');
         }
 
-        let currentLevel = 1;
-        let cipher = {};
-        let targetWord = "";
-
-        function startNewLevel() {
-            const data = rawWords[Math.floor(Math.random() * rawWords.length)].split(":");
-            targetWord = data[0].toUpperCase();
-            const clue = data[1];
-
-            // Generate random cipher mapping
-            cipher = {};
-            const nums = Array.from({length: 26}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((char, i) => cipher[char] = nums[i]);
-
-            // Clear and Build UI
-            document.getElementById('main-grid').innerHTML = "";
-            document.getElementById('clue-display').innerText = "CLUE: " + clue;
-            document.getElementById('next-btn').style.display = "none";
-            document.getElementById('lvl-tag').innerText = currentLevel;
-
-            targetWord.split("").forEach(char => {
-                const num = cipher[char];
-                const container = document.createElement('div');
-                container.className = 'box-unit';
-                
-                const input = document.createElement('input');
-                input.className = 'box';
-                input.maxLength = 1;
-                input.dataset.num = num;
-                input.oninput = (e) => syncBoxes(num, e.target.value.toUpperCase());
-
-                const label = document.createElement('div');
-                label.className = 'num-label';
-                label.innerText = num;
-
-                container.append(input, label);
-                document.getElementById('main-grid').appendChild(container);
+        // --- 1. Cryptogram Logic ---
+        const cryptoWords = [{w:"APPLE", c:"A fruit"}, {w:"TIGER", c:"Striped animal"}, {w:"COFFEE", c:"Bitter drink"}];
+        let currentWord = "";
+        function startCrypto() {
+            hideAll();
+            document.getElementById('crypto-game').style.display = 'block';
+            const data = cryptoWords[Math.floor(Math.random()*cryptoWords.length)];
+            currentWord = data.w;
+            document.getElementById('crypto-clue').innerText = "Clue: " + data.c;
+            document.getElementById('next-crypto').style.display = 'none';
+            const grid = document.getElementById('crypto-grid');
+            grid.innerHTML = "";
+            const cipher = {};
+            const nums = [...Array(26).keys()].sort(() => Math.random() - 0.5);
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((l, i) => cipher[l] = nums[i] + 1);
+            data.w.split("").forEach(char => {
+                const n = cipher[char];
+                grid.innerHTML += `<div class="box-unit"><input class="box" data-num="${n}" oninput="sync(${n}, this.value.toUpperCase())"><div class="num-label">${n}</div></div>`;
             });
         }
-
-        function syncBoxes(num, val) {
-            document.querySelectorAll(`.box[data-num="${num}"]`).forEach(el => el.value = val);
-            checkWin();
+        function sync(n, v) {
+            document.querySelectorAll(`.box[data-num="${n}"]`).forEach(i => i.value = v);
+            let guess = Array.from(document.querySelectorAll('.box')).map(i => i.value).join("");
+            if(guess === currentWord) { alert("Winner!"); document.getElementById('next-crypto').style.display = 'block'; }
         }
 
-        function checkWin() {
-            let currentGuess = "";
-            document.querySelectorAll('#main-grid .box').forEach(el => currentGuess += el.value);
-            if (currentGuess === targetWord) {
-                document.getElementById('next-btn').style.display = "inline-block";
-                currentLevel++;
-                confettiEffect();
+        // --- 2. Block Crush Logic (Base) ---
+        function startBlock() {
+            hideAll();
+            document.getElementById('block-game').style.display = 'block';
+            const canvas = document.getElementById('blockCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 320; canvas.height = 320;
+            function drawGrid() {
+                for(let r=0; r<8; r++) {
+                    for(let c=0; c<8; c++) {
+                        ctx.fillStyle = "#4e342e";
+                        ctx.fillRect(c*40, r*40, 38, 38);
+                    }
+                }
             }
+            drawGrid();
         }
 
-        function confettiEffect() {
-            alert("Level Complete! 🎉");
-        }
+        // --- 3. Temple Run Lite Logic ---
+        function startTemple() {
+            hideAll();
+            document.getElementById('temple-game').style.display = 'block';
+            const canvas = document.getElementById('templeCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 300; canvas.height = 450;
+            let playerX = 125, obstacles = [], frame = 0, alive = true;
 
-        startNewLevel();
+            // Touch/Click Control
+            canvas.onclick = (e) => { if(e.clientX < window.innerWidth/2) playerX = 25; else playerX = 225; };
+            window.onkeydown = (e) => { if(e.key === "ArrowLeft") playerX = 25; if(e.key === "ArrowRight") playerX = 225; };
+
+            function loop() {
+                if(!alive) return;
+                ctx.fillStyle = "#333"; ctx.fillRect(0,0,300,450);
+                ctx.fillStyle = "#555"; ctx.fillRect(25,0,250,450); // Road
+                
+                ctx.fillStyle = "gold"; ctx.fillRect(playerX, 350, 50, 50); // Player
+
+                if(frame++ % 60 === 0) obstacles.push({x: Math.random() < 0.5 ? 25 : 225, y: -50});
+                
+                obstacles.forEach((o, i) => {
+                    o.y += 5; ctx.fillStyle = "red"; ctx.fillRect(o.x, o.y, 50, 50);
+                    if(o.y > 300 && o.y < 400 && o.x === playerX) { alive = false; alert("Crashed!"); location.reload(); }
+                });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
     </script>
 </body>
 </html>
