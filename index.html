@@ -1,252 +1,406 @@
+    
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Hub Pro | Ultimate Edition</title>
+    <title>Sadaf Hub Pro | The Ultimate Gaming Ecosystem</title>
     
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- CSS VARIABLES & THEME --- */
         :root {
             --blue: #00f2ff;
             --pink: #ff00ff;
             --gold: #ffcc00;
             --bg: #05050a;
             --card: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: blur(10px);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
-            background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif;
-            margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center;
-            overflow-x: hidden; min-height: 100vh;
+            background: var(--bg);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* --- Header UI --- */
+        /* --- LOADING & LOGIN OVERLAY --- */
+        #login-overlay {
+            position: fixed; inset: 0; background: var(--bg);
+            z-index: 100000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        .login-card {
+            background: var(--card); border: 2px solid var(--blue);
+            padding: 40px; border-radius: 30px; width: 85%; max-width: 380px;
+            text-align: center; box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+            backdrop-filter: var(--glass);
+        }
+
+        /* --- HEADER & STATS --- */
         .header {
-            width: 100%; padding: 15px; display: flex; justify-content: space-between; align-items: center;
-            background: var(--card); backdrop-filter: blur(10px); border-bottom: 1px solid #333;
-            position: sticky; top: 0; z-index: 1000;
+            width: 100%; padding: 15px 20px; display: flex;
+            justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 1000; backdrop-filter: var(--glass);
         }
 
         .coin-display {
             font-family: 'Orbitron'; color: var(--gold); font-size: 1.2rem;
-            font-weight: 900; text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+            display: flex; align-items: center; gap: 8px; font-weight: 900;
         }
 
-        /* --- Notification Pop --- */
+        /* --- NOTIFICATION --- */
         #boss-notif {
-            position: fixed; top: 80px; right: 15px; width: 280px; 
-            background: linear-gradient(135deg, #111, #222); border-left: 5px solid var(--gold);
-            padding: 15px; border-radius: 12px; display: none; z-index: 5000;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8); animation: slideIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            position: fixed; top: 80px; right: 15px; width: 280px;
+            background: linear-gradient(135deg, #111, #222);
+            border-left: 4px solid var(--blue); border-radius: 12px;
+            padding: 15px; display: none; z-index: 5000;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); animation: slideIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
+
+        /* --- GAME ENGINE UI --- */
+        .game-container { width: 100%; max-width: 450px; padding: 20px; }
+
+        .mode-selector {
+            display: flex; gap: 10px; margin-bottom: 20px;
+        }
+
+        .btn-mode {
+            flex: 1; padding: 10px; border-radius: 12px; border: 1px solid #333;
+            background: var(--card); color: #888; font-family: 'Orbitron';
+            font-size: 0.7rem; cursor: pointer; transition: 0.3s;
+        }
+
+        .btn-mode.active { border-color: var(--blue); color: var(--blue); background: rgba(0, 242, 255, 0.1); }
+
+        .grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+            background: rgba(255,255,255,0.02); padding: 10px; border-radius: 20px;
+            border: 1px solid var(--border); margin-bottom: 20px;
+        }
+
+        .cell {
+            aspect-ratio: 1; background: #0a0a12; border: 1px solid #222;
+            border-radius: 12px; display: flex; align-items: center;
+            justify-content: center; font-size: 2rem; cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .cell:active { transform: scale(0.9); background: #151525; }
+
+        /* --- ACTION BAR --- */
+        .action-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin: 10px 0; }
+        
+        .nav-btn {
+            background: var(--card); border: 1px solid var(--border);
+            padding: 15px 5px; border-radius: 15px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px; font-family: 'Orbitron'; font-size: 0.65rem; color: #fff;
+        }
+
+        /* --- SHOP & MODALS --- */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; z-index: 10000; padding: 20px;
+        }
+
+        .modal-content {
+            background: #0f0f15; border: 2px solid var(--blue);
+            padding: 30px; border-radius: 30px; width: 100%; max-width: 420px;
+            max-height: 85vh; overflow-y: auto; text-align: center;
+        }
+
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        
+        .shop-card {
+            background: #000; border: 1px solid #222; padding: 15px;
+            border-radius: 20px; transition: 0.3s; position: relative;
+        }
+
+        .shop-card.owned { border-color: var(--gold); }
+
+        .price-tag { color: var(--gold); font-family: 'Orbitron'; font-size: 0.8rem; margin: 10px 0; }
+
+        /* --- SPIN WHEEL --- */
+        .wheel-box {
+            width: 180px; height: 180px; border: 6px dashed var(--pink);
+            border-radius: 50%; margin: 20px auto; display: flex;
+            align-items: center; justify-content: center; font-size: 4rem;
+            transition: 4s cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+
+        /* --- UTILS --- */
+        .input-pro {
+            width: 100%; padding: 15px; background: #000; border: 1px solid #333;
+            color: white; border-radius: 15px; margin-bottom: 15px; font-size: 1rem;
+            font-family: 'Rajdhani'; text-align: center;
+        }
+
+        .btn-glow {
+            width: 100%; padding: 15px; background: var(--blue); color: #000;
+            border: none; border-radius: 15px; font-family: 'Orbitron';
+            font-weight: 900; cursor: pointer; transition: 0.3s;
+        }
+
         @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
 
-        /* --- Main UI Buttons --- */
-        .action-bar { display: flex; gap: 10px; margin: 20px 0; width: 90%; justify-content: center; }
-        .btn-icon {
-            flex: 1; background: var(--card); border: 1px solid #333; color: white;
-            padding: 12px; border-radius: 15px; font-family: 'Orbitron'; font-size: 0.7rem;
-            display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
-            transition: 0.3s;
-        }
-        .btn-icon:active { transform: scale(0.95); border-color: var(--blue); }
-        .btn-icon i-emoji { font-size: 1.5rem; }
-
-        /* --- Boro Bet Box --- */
-        .bet-container {
-            width: 90%; max-width: 400px; background: rgba(0, 242, 255, 0.05);
-            border: 2px solid var(--blue); border-radius: 20px; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
-        }
-        .bet-label { font-family: 'Orbitron'; font-size: 1.4rem; font-weight: 900; }
-
-        /* --- Game Grid (5x5) --- */
-        .grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
-            width: 92vw; max-width: 400px; margin-bottom: 20px;
-        }
-        .cell {
-            aspect-ratio: 1; background: #0f0f1a; border: 1px solid #222;
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; cursor: pointer; transition: 0.2s;
-        }
-        .cell:active { background: #1a1a2e; }
-        .cell.win-glow { animation: winPulse 0.5s infinite; border-color: var(--gold); }
-        @keyframes winPulse { 0% { box-shadow: 0 0 5px var(--gold); } 50% { box-shadow: 0 0 20px var(--gold); } 100% { box-shadow: 0 0 5px var(--gold); } }
-
-        /* --- Modals --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
-        .modal-content { background: #0f0f15; border: 2px solid var(--blue); border-radius: 30px; padding: 30px; width: 100%; max-width: 400px; text-align: center; }
-        
-        /* --- Daily Spin Wheel --- */
-        .wheel-box {
-            width: 160px; height: 160px; border: 6px dashed var(--pink); border-radius: 50%;
-            margin: 20px auto; display: flex; align-items: center; justify-content: center;
-            font-size: 3rem; transition: 4s cubic-bezier(0.1, 0.8, 0.2, 1);
-        }
-
-        /* --- Input Fields --- */
-        .pro-input { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: white; border-radius: 15px; margin-bottom: 12px; font-size: 1rem; }
-        .pro-input:focus { border-color: var(--blue); }
-
-        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="boss-notif">
-        <div style="color:var(--gold); font-family:'Orbitron'; font-size:0.8rem;">⚡ BOSS MESSAGE</div>
-        <div id="msg-text" style="margin: 8px 0; font-size: 1rem;"></div>
-        <div style="font-size: 0.7rem; color: #666;">Tap to dismiss</div>
+    <div id="login-overlay">
+        <div class="login-card">
+            <div style="font-size: 4rem; margin-bottom: 15px;">🎮</div>
+            <h1 class="login-title">SADAF HUB PRO</h1>
+            <input type="text" id="user-input-field" class="input-pro" placeholder="ENTER NICKNAME">
+            <button class="btn-glow" onclick="initSession()">JOIN MISSION</button>
+        </div>
     </div>
 
-    <div id="login-screen">
-        <div style="font-size: 4rem; margin-bottom: 10px;">🎮</div>
-        <h1 style="font-family:'Orbitron'; color:var(--blue); margin-bottom: 30px;">SADAF HUB PRO</h1>
-        <input type="text" id="user-name" class="pro-input" style="width: 280px; text-align: center;" placeholder="Enter Nickname">
-        <button class="btn-icon" style="width: 280px; height: 55px; font-size: 1.1rem; border-color: var(--blue);" onclick="login()">START MISSION</button>
+    <div id="boss-notif">
+        <div style="color:var(--blue); font-family:'Orbitron'; font-size:0.7rem;">COMMAND CENTER ⚡</div>
+        <div id="notif-text" style="margin: 8px 0; font-size: 0.95rem;"></div>
+        <div style="font-size: 0.7rem; color: #555;">Tap to close</div>
     </div>
 
     <div class="header">
-        <div class="coin-display">🪙 <span id="balance">0</span></div>
-        <div id="user-tag" style="font-size: 0.8rem; color: var(--blue); font-family: 'Orbitron';"></div>
-        <button id="boss-btn" class="btn-icon" style="flex:none; border-color:red; color:red; display:none;" onclick="openModal('boss-modal')">BOSS</button>
+        <div class="coin-display">🪙 <span id="pts-balance">0</span></div>
+        <div id="display-name" style="font-family:'Orbitron'; font-size:0.7rem; color:var(--blue);">LOADING...</div>
+        <button id="boss-panel-btn" class="nav-btn" style="display:none; border-color:red; color:red; padding:5px 10px;" onclick="openModal('boss-modal')">ADMIN</button>
     </div>
 
-    <div class="action-bar">
-        <div class="btn-icon" onclick="openModal('gift-modal')">
-            <span style="font-size: 1.5rem;">🎁</span>
-            <span>DAILY GIFT</span>
+    <div class="game-container">
+        <div class="mode-selector">
+            <button id="mode-easy" class="btn-mode active" onclick="changeDifficulty('easy')">EASY MODE</button>
+            <button id="mode-hard" class="btn-mode" onclick="changeDifficulty('hard')">HARD MODE</button>
         </div>
-        <div class="btn-icon" onclick="openModal('invite-modal')">
-            <span style="font-size: 1.5rem;">✉️</span>
-            <span>INVITE</span>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; font-family: 'Orbitron';">
+            <span style="color: var(--blue);">YOU: <span id="player-ico-display">🤖</span></span>
+            <span style="color: var(--pink);">AI: <span id="ai-ico-display">👻</span></span>
         </div>
-        <div class="btn-icon" onclick="alert('Shop Coming Soon!')">
-            <span style="font-size: 1.5rem;">🛒</span>
-            <span>SHOP</span>
+
+        <div class="grid" id="game-grid"></div>
+
+        <div class="action-bar">
+            <button class="nav-btn" onclick="openModal('gift-modal')">
+                <span style="font-size: 1.5rem;">🎁</span>
+                <span>SPIN</span>
+            </button>
+            <button class="nav-btn" onclick="openModal('shop-modal')">
+                <span style="font-size: 1.5rem;">🛒</span>
+                <span>SHOP</span>
+            </button>
+            <button class="nav-btn" onclick="openModal('invite-modal')">
+                <span style="font-size: 1.5rem;">✉️</span>
+                <span>INVITE</span>
+            </button>
         </div>
     </div>
 
-    <div class="bet-container">
-        <div class="bet-label">BET: <span id="bet-amt">50</span></div>
-        <div style="display:flex; gap:12px;">
-            <button class="btn-icon" style="padding: 10px 20px; font-size: 1.2rem;" onclick="changeBet(-50)">-</button>
-            <button class="btn-icon" style="padding: 10px 20px; font-size: 1.2rem;" onclick="changeBet(50)">+</button>
-        </div>
-    </div>
-
-    <div class="grid" id="board"></div>
-
-    <div id="invite-modal" class="modal">
+    <div id="shop-modal" class="modal">
         <div class="modal-content">
-            <h2 style="font-family:'Orbitron'; color:var(--blue)">INVITE FRIENDS</h2>
-            <p>Share your link and get <span style="color:var(--gold)">200 Coins</span> per invite!</p>
-            <button class="btn-icon" style="width:100%; height:50px; background:#0084ff; border:none; margin-bottom:12px;" onclick="doInvite('messenger')">MESSENGER</button>
-            <button class="btn-icon" style="width:100%; height:50px; border-color:var(--gold); color:var(--gold);" onclick="doInvite('copy')">COPY LINK</button>
-            <button class="btn-icon" style="width:100%; margin-top:20px; border-color:#444" onclick="closeModal('invite-modal')">CLOSE</button>
+            <h2 style="font-family:'Orbitron'; color:var(--blue)">PREMIUM SHOP</h2>
+            <div class="shop-grid" id="shop-items-grid"></div>
+            <button class="btn-glow" style="margin-top: 20px; background: transparent; color: white; border: 1px solid #333;" onclick="closeModal('shop-modal')">BACK</button>
         </div>
     </div>
 
     <div id="gift-modal" class="modal">
-        <div class="modal-content" style="border-color:var(--pink)">
+        <div class="modal-content" style="border-color: var(--pink);">
             <h2 style="font-family:'Orbitron'; color:var(--pink)">LUCKY SPIN</h2>
-            <div class="wheel-box" id="wheel">🎁</div>
-            <div id="timer" style="color:#888; margin-top:10px;"></div>
-            <button id="spin-btn" class="btn-icon" style="width:100%; height:55px; background:var(--pink); border:none; margin-top:20px; font-size:1.1rem" onclick="spinGift()">SPIN NOW</button>
-            <button class="btn-icon" style="width:100%; margin-top:10px; border-color:#444" onclick="closeModal('gift-modal')">CLOSE</button>
+            <div class="wheel-box" id="spin-wheel">🎁</div>
+            <p id="spin-timer-text" style="color: #666;">Ready to claim your gift!</p>
+            <button id="spin-btn-main" class="btn-glow" style="background: var(--pink);" onclick="executeSpin()">SPIN NOW</button>
+            <button class="nav-btn" style="width:100%; margin-top:15px; border:none;" onclick="closeModal('gift-modal')">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="invite-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family:'Orbitron'; color:var(--blue)">INVITE FRIENDS</h2>
+            <p>Get <span style="color:var(--gold)">200 Coins</span> instantly for every invite!</p>
+            <button class="btn-glow" style="background:#0084ff; margin-bottom:12px;" onclick="shareInvite('messenger')">SEND IN MESSENGER</button>
+            <button class="btn-glow" style="background:transparent; border:1px solid var(--gold); color:var(--gold);" onclick="shareInvite('copy')">COPY LINK</button>
+            <button class="nav-btn" style="width:100%; margin-top:20px; border:none;" onclick="closeModal('invite-modal')">BACK</button>
         </div>
     </div>
 
     <div id="boss-modal" class="modal">
-        <div class="modal-content" style="border-color:red">
-            <h2 style="font-family:'Orbitron'; color:red">ADMIN PANEL</h2>
-            <input type="number" id="gift-val" class="pro-input" placeholder="Coin Amount">
-            <textarea id="gift-sms" class="pro-input" style="height:80px" placeholder="Boss Message..."></textarea>
-            <button class="btn-icon" style="width:100%; height:50px; background:red; border:none;" onclick="bossSend()">SEND TO USER</button>
-            <button class="btn-icon" style="width:100%; margin-top:10px; border-color:#444" onclick="closeModal('boss-modal')">EXIT</button>
+        <div class="modal-content" style="border-color: red;">
+            <h2 style="font-family:'Orbitron'; color:red">BOSS PANEL</h2>
+            <div style="background:rgba(255,0,0,0.05); padding:15px; border-radius:15px; margin-bottom:15px;">
+                <p style="font-size:0.8rem; color:#aaa;">EDIT ITEM PRICE</p>
+                <input type="number" id="edit-item-id" class="input-pro" placeholder="Item ID (0-9)">
+                <input type="number" id="edit-item-price" class="input-pro" placeholder="New Price">
+                <button class="btn-glow" style="background:var(--gold);" onclick="adminPriceUpdate()">UPDATE PRICE</button>
+            </div>
+            <div style="background:rgba(0,242,255,0.05); padding:15px; border-radius:15px;">
+                <p style="font-size:0.8rem; color:#aaa;">SEND SYSTEM MESSAGE</p>
+                <textarea id="admin-msg-box" class="input-pro" style="height:80px;" placeholder="Message to users..."></textarea>
+                <button class="btn-glow" onclick="adminSendMessage()">SEND MESSAGE</button>
+            </div>
+            <button class="nav-btn" style="width:100%; margin-top:15px; border-color:white;" onclick="closeModal('boss-modal')">EXIT ADMIN</button>
         </div>
     </div>
 
-    <audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-
     <script>
+        /* --- CONFIGURATION --- */
         const TG_TOKEN = "8536299808:AAHJFWEna66RMHZdq-AV20Ak1KOOSwTJT9k";
-        const TG_CHAT = "7416528268";
+        const TG_CHAT_ID = "7416528268";
 
-        let pts = parseInt(localStorage.getItem('sadaf_pts')) || 1000;
-        let lastSpin = localStorage.getItem('sadaf_spin_time') || 0;
-        let myName = localStorage.getItem('sadaf_user') || "";
+        /* --- GLOBAL STATE --- */
+        let userData = {
+            name: localStorage.getItem('sadaf_user') || "",
+            pts: parseInt(localStorage.getItem('sadaf_pts')) || 1000,
+            lastSpin: localStorage.getItem('sadaf_spin_time') || 0,
+            ownedIcons: JSON.parse(localStorage.getItem('sadaf_owned')) || ['🤖'],
+            currentIcon: localStorage.getItem('sadaf_current_ico') || '🤖',
+            lastWinner: localStorage.getItem('sadaf_last_winner') || 'AI'
+        };
+
+        let shopItems = [
+            {id: 0, ico: '🤖', price: 0}, {id: 1, ico: '👽', price: 200},
+            {id: 2, ico: '🦁', price: 500}, {id: 3, ico: '🐺', price: 800},
+            {id: 4, ico: '🐲', price: 1500}, {id: 5, ico: '💀', price: 2000},
+            {id: 6, ico: '🤡', price: 300}, {id: 7, ico: '🦊', price: 400},
+            {id: 8, ico: '💎', price: 5000}, {id: 9, ico: '👑', price: 10000}
+        ];
+
+        let aiIcons = ['👻', '👾', '🧟', '👹', '👺', '🌑', '🧛', '🎃', '☠️', '👽'];
         let board = Array(25).fill(null);
-        let active = true;
+        let difficulty = 'easy';
+        let isGameActive = true;
+        let isSpinning = false;
 
-        // --- Core Functions ---
-        function login() {
-            let n = document.getElementById('user-name').value.trim();
-            if(!n) return;
-            localStorage.setItem('sadaf_user', n);
-            myName = n;
-            setup();
-            notifyTelegram(n);
+        /* --- INITIALIZATION --- */
+        function initSession() {
+            const input = document.getElementById('user-input-field');
+            if(!input.value.trim()) return alert("Enter your name!");
+            
+            userData.name = input.value.trim();
+            localStorage.setItem('sadaf_user', userData.name);
+            
+            document.getElementById('login-overlay').style.display = 'none';
+            setupGame();
+            sendTelegramNotice();
         }
 
-        function setup() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('user-tag').innerText = myName.toUpperCase();
-            if(myName === "SIYAMBOSS") document.getElementById('boss-btn').style.display = 'flex';
-            updateUI();
+        function setupGame() {
+            document.getElementById('display-name').innerText = userData.name.toUpperCase();
+            document.getElementById('player-ico-display').innerText = userData.currentIcon;
+            if(userData.name === "SIYAMBOSS") document.getElementById('boss-panel-btn').style.display = 'block';
+            
+            loadCustomPrices();
+            syncUI();
             renderBoard();
-            checkBossUpdate();
+            renderShop();
+            checkAdminBroadcasting();
+            setInterval(syncSpinTimer, 1000);
         }
 
-        async function notifyTelegram(name) {
-            const count = Math.floor(Math.random() * 5000);
-            const text = `🔥 *NEW USER JOINED*\n👤 Name: ${name}\n🆔 User No: #${count}\n🪙 Balance: ${pts}`;
-            await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT}&text=${encodeURIComponent(text)}&parse_mode=Markdown`);
+        async function sendTelegramNotice() {
+            const count = Math.floor(Math.random() * 10000);
+            const text = `🔥 *SADAF HUB PRO: NEW USER*\n👤 Name: ${userData.name}\n🆔 User No: #${count}\n🪙 Balance: ${userData.pts}`;
+            await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=Markdown`);
         }
 
+        /* --- CORE GAME LOGIC --- */
         function renderBoard() {
-            const container = document.getElementById('board');
-            container.innerHTML = '';
-            board.forEach((val, i) => {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                if(val === 'O') { cell.innerText = 'O'; cell.style.color = 'var(--blue)'; }
-                if(val === 'X') { cell.innerText = 'X'; cell.style.color = 'var(--pink)'; }
-                cell.onclick = () => playerMove(i);
-                container.appendChild(cell);
+            const grid = document.getElementById('game-grid');
+            grid.innerHTML = '';
+            board.forEach((cell, i) => {
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.innerText = cell || '';
+                if(cell === userData.currentIcon) div.style.color = 'var(--blue)';
+                div.onclick = () => handlePlayerMove(i);
+                grid.appendChild(div);
             });
         }
 
-        function playerMove(i) {
-            if(!board[i] && active) {
-                if(pts < 50) return alert("No coins!");
-                board[i] = 'O';
-                document.getElementById('sfx-click').play();
+        function handlePlayerMove(i) {
+            if(!board[i] && isGameActive) {
+                board[i] = userData.currentIcon;
                 renderBoard();
-                if(checkWin('O')) return endMatch(true);
-                active = false;
-                setTimeout(aiMove, 600);
+                if(checkWinner(userData.currentIcon)) return endMatch("YOU WON!");
+                
+                isGameActive = false;
+                setTimeout(handleAiMove, 600);
             }
         }
 
-        function aiMove() {
+        function handleAiMove() {
+            let move;
+            const aiIcon = aiIcons[Math.floor(Math.random() * aiIcons.length)];
+            document.getElementById('ai-ico-display').innerText = aiIcon;
+
+            if(difficulty === 'hard') {
+                move = getBestMove(aiIcon, userData.currentIcon);
+            } else {
+                // Easy Mode with Human-like rotation
+                if(userData.lastWinner === 'AI') {
+                    move = getSubOptimalMove(aiIcon, userData.currentIcon);
+                } else {
+                    move = getBestMove(aiIcon, userData.currentIcon);
+                }
+            }
+
+            if(move !== null) {
+                board[move] = aiIcon;
+                renderBoard();
+                if(checkWinner(aiIcon)) return endMatch("AI WON!");
+            }
+            isGameActive = true;
+        }
+
+        function getBestMove(me, enemy) {
+            let win = findEmptyWinningSpot(me);
+            if(win !== null) return win;
+            let block = findEmptyWinningSpot(enemy);
+            if(block !== null) return block;
+            if(!board[12]) return 12;
             let empty = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if(empty.length > 0) {
-                let move = empty[Math.floor(Math.random() * empty.length)];
-                board[move] = 'X';
-                renderBoard();
-                if(checkWin('X')) return endMatch(false);
-                active = true;
-            }
+            return empty[Math.floor(Math.random() * empty.length)];
         }
 
-        function checkWin(p) {
+        function getSubOptimalMove(me, enemy) {
+            let win = findEmptyWinningSpot(me);
+            if(win !== null) return win;
+            // Sometimes "forget" to block to let user win
+            if(Math.random() > 0.6) {
+                let block = findEmptyWinningSpot(enemy);
+                if(block !== null) return block;
+            }
+            return board.map((v, i) => v === null ? i : null).filter(v => v !== null)[0];
+        }
+
+        function findEmptyWinningSpot(p) {
+            for(let i=0; i<25; i++) {
+                if(!board[i]) {
+                    board[i] = p;
+                    if(checkWinner(p)) { board[i] = null; return i; }
+                    board[i] = null;
+                }
+            }
+            return null;
+        }
+
+        function checkWinner(p) {
             for (let i = 0; i < 25; i++) {
                 if (board[i] !== p) continue;
                 let r = Math.floor(i / 5), c = i % 5;
@@ -258,106 +412,199 @@
             return false;
         }
 
-        function endMatch(won) {
-            if(won) { confetti(); pts += 50; alert("BRO, YOU WON!"); }
-            else { pts -= 50; alert("AI WON!"); }
-            updateUI();
-            board.fill(null);
-            active = true;
-            renderBoard();
+        function endMatch(msg) {
+            isGameActive = false;
+            setTimeout(() => {
+                alert(msg);
+                if(msg.includes("YOU")) {
+                    userData.pts += 100;
+                    userData.lastWinner = 'USER';
+                    confetti();
+                } else {
+                    userData.pts = Math.max(0, userData.pts - 50);
+                    userData.lastWinner = 'AI';
+                }
+                localStorage.setItem('sadaf_last_winner', userData.lastWinner);
+                board.fill(null);
+                isGameActive = true;
+                syncUI();
+                renderBoard();
+            }, 500);
         }
 
-        // --- Social & Invite ---
-        function doInvite(type) {
-            const link = window.location.href + "?ref=" + myName;
-            if(type === 'messenger') {
-                window.location.href = "fb-messenger://share/?link=" + encodeURIComponent(link);
+        /* --- SHOP & ECONOMY --- */
+        function renderShop() {
+            const grid = document.getElementById('shop-items-grid');
+            grid.innerHTML = '';
+            shopItems.forEach(item => {
+                const isOwned = userData.ownedIcons.includes(item.ico);
+                grid.innerHTML += `
+                    <div class="shop-card ${isOwned ? 'owned' : ''}">
+                        <div style="font-size: 2.5rem;">${item.ico}</div>
+                        <div class="price-tag">${isOwned ? 'OWNED' : item.price + ' PTS'}</div>
+                        <button class="nav-btn" style="width:100%; border-color:var(--blue);" onclick="handlePurchase(${item.id})">
+                            ${isOwned ? (userData.currentIcon === item.ico ? 'EQUIPPED' : 'EQUIP') : 'BUY'}
+                        </button>
+                        <span style="position:absolute; top:5px; right:10px; font-size:0.6rem; color:#444;">ID: ${item.id}</span>
+                    </div>`;
+            });
+        }
+
+        function handlePurchase(id) {
+            const item = shopItems[id];
+            if(userData.ownedIcons.includes(item.ico)) {
+                userData.currentIcon = item.ico;
+                localStorage.setItem('sadaf_current_ico', item.ico);
+                document.getElementById('player-ico-display').innerText = item.ico;
+                alert("Equipped!");
+            } else if(userData.pts >= item.price) {
+                userData.pts -= item.price;
+                userData.ownedIcons.push(item.ico);
+                localStorage.setItem('sadaf_owned', JSON.stringify(userData.ownedIcons));
+                confetti();
+                alert("Purchased Successfully!");
             } else {
-                navigator.clipboard.writeText(link);
-                alert("Link Copied! You get 200 coins per invite.");
+                alert("Not enough coins!");
             }
-            pts += 200; updateUI(); confetti();
+            syncUI();
+            renderShop();
         }
 
-        // --- Daily Gift (24h) ---
-        function spinGift() {
+        /* --- SPIN SYSTEM (24h) --- */
+        function executeSpin() {
+            if(isSpinning) return;
             const now = Date.now();
-            if(now - lastSpin < 24*60*60*1000) return;
+            if(now - userData.lastSpin < 86400000) return alert("Come back later!");
+
+            isSpinning = true;
+            const wheel = document.getElementById('spin-wheel');
+            const btn = document.getElementById('spin-btn-main');
             
-            const wheel = document.getElementById('wheel');
-            wheel.style.transform = "rotate(1440deg)";
-            
+            btn.innerText = "SPINNING...";
+            const rot = 1800 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${rot}deg)`;
+
             setTimeout(() => {
                 const prize = 500;
-                pts += prize;
-                lastSpin = Date.now();
-                localStorage.setItem('sadaf_spin_time', lastSpin);
-                updateUI();
+                userData.pts += prize;
+                userData.lastSpin = Date.now();
+                localStorage.setItem('sadaf_spin_time', userData.lastSpin);
+                
                 confetti();
-                alert(`CONGRATS! YOU GOT ${prize} COINS!`);
-                wheel.style.transform = "rotate(0deg)";
-                closeModal('gift-modal');
+                alert(`🎊 YOU WON ${prize} COINS!`);
+                
+                wheel.style.transition = 'none';
+                wheel.style.transform = 'rotate(0deg)';
+                setTimeout(() => wheel.style.transition = '4s cubic-bezier(0.1, 0.8, 0.2, 1)', 100);
+                
+                isSpinning = false;
+                syncUI();
+                syncSpinTimer();
             }, 4000);
         }
 
-        // --- Boss Controls ---
-        function bossSend() {
-            const gift = document.getElementById('gift-val').value;
-            const sms = document.getElementById('gift-sms').value;
-            localStorage.setItem('boss_sms', sms);
-            localStorage.setItem('boss_gift', gift);
-            alert("Sent successfully!");
+        function syncSpinTimer() {
+            const btn = document.getElementById('spin-btn-main');
+            const txt = document.getElementById('spin-timer-text');
+            const left = 86400000 - (Date.now() - userData.lastSpin);
+
+            if(left > 0 && !isSpinning) {
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                const h = Math.floor(left / 3600000);
+                const m = Math.floor((left % 3600000) / 60000);
+                const s = Math.floor((left % 60000) / 1000);
+                btn.innerText = `LOCKED (${h}h ${m}m ${s}s)`;
+                txt.innerText = "Next spin available in 24 hours.";
+            } else if(!isSpinning) {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.innerText = "SPIN NOW";
+                txt.innerText = "Claim your daily gift!";
+            }
+        }
+
+        /* --- ADMIN CONTROLS --- */
+        function adminPriceUpdate() {
+            const id = document.getElementById('edit-item-id').value;
+            const price = document.getElementById('edit-item-price').value;
+            if(id === "" || price === "") return;
+            
+            let customPrices = JSON.parse(localStorage.getItem('sadaf_custom_prices')) || {};
+            customPrices[id] = parseInt(price);
+            localStorage.setItem('sadaf_custom_prices', JSON.stringify(customPrices));
+            
+            loadCustomPrices();
+            renderShop();
+            alert("Price Updated!");
+        }
+
+        function adminSendMessage() {
+            const msg = document.getElementById('admin-msg-box').value;
+            localStorage.setItem('boss_broadcast', msg);
+            alert("Message broadcasted to all users!");
             closeModal('boss-modal');
         }
 
-        function checkBossUpdate() {
-            const sms = localStorage.getItem('boss_sms');
-            if(sms) {
+        function loadCustomPrices() {
+            const saved = JSON.parse(localStorage.getItem('sadaf_custom_prices'));
+            if(saved) {
+                Object.keys(saved).forEach(id => {
+                    if(shopItems[id]) shopItems[id].price = saved[id];
+                });
+            }
+        }
+
+        function checkAdminBroadcasting() {
+            const msg = localStorage.getItem('boss_broadcast');
+            if(msg) {
                 const notif = document.getElementById('boss-notif');
-                document.getElementById('msg-text').innerText = sms;
+                document.getElementById('notif-text').innerText = msg;
                 notif.style.display = 'block';
-                
-                const gift = parseInt(localStorage.getItem('boss_gift')) || 0;
-                if(gift > 0) { pts += gift; updateUI(); }
-                
                 notif.onclick = () => {
                     notif.style.display = 'none';
-                    localStorage.removeItem('boss_sms');
-                    localStorage.removeItem('boss_gift');
+                    localStorage.removeItem('boss_broadcast');
                 };
             }
         }
 
-        function updateUI() {
-            document.getElementById('balance').innerText = pts;
-            localStorage.setItem('sadaf_pts', pts);
-            
-            // Update Spin Timer
-            const timer = document.getElementById('timer');
-            const now = Date.now();
-            const left = 24*60*60*1000 - (now - lastSpin);
-            if(left > 0) {
-                document.getElementById('spin-btn').disabled = true;
-                document.getElementById('spin-btn').style.opacity = "0.5";
-                const h = Math.floor(left / 3600000);
-                const m = Math.floor((left % 3600000) / 60000);
-                timer.innerText = `Next Spin in ${h}h ${m}m`;
+        /* --- HELPERS --- */
+        function shareInvite(type) {
+            const url = window.location.href + "?ref=" + userData.name;
+            if(type === 'messenger') {
+                window.location.href = "fb-messenger://share/?link=" + encodeURIComponent(url);
             } else {
-                document.getElementById('spin-btn').disabled = false;
-                document.getElementById('spin-btn').style.opacity = "1";
-                timer.innerText = "Ready to Spin!";
+                navigator.clipboard.writeText(url);
+                alert("Link Copied!");
             }
+            userData.pts += 200;
+            syncUI();
+            confetti();
         }
 
-        function changeBet(v) {
-            if(pts < 100) return;
-            // Simplified bet for now
+        function changeDifficulty(m) {
+            difficulty = m;
+            document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+            document.getElementById('mode-' + m).classList.add('active');
+            board.fill(null);
+            renderBoard();
+        }
+
+        function syncUI() {
+            document.getElementById('pts-balance').innerText = userData.pts;
+            localStorage.setItem('sadaf_pts', userData.pts);
         }
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        window.onload = () => { if(myName) setup(); };
+        /* --- AUTO START --- */
+        window.onload = () => {
+            if(userData.name) {
+                document.getElementById('login-overlay').style.display = 'none';
+                setupGame();
+            }
+        };
     </script>
 </body>
-            </html>
+</html>
