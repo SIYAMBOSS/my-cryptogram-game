@@ -3,343 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Battle Hub Pro - Ultimate Edition</title>
+    <title>Sadaf Battle Hub Pro - 24h Update</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { 
-            --neon: #00f2ff; 
-            --bg: #0a0a12; 
-            --card: rgba(255, 255, 255, 0.05); 
-            --x-color: #ff0055; 
-            --gold: #ffcc00; 
-            --glow: 0 0 15px var(--neon);
-        }
-
-        body { 
-            background: var(--bg); 
-            background-image: radial-gradient(circle at center, #1a1a2e 0%, #0a0a12 100%);
-            color: white; 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
-            overflow-x: hidden; 
-            padding-bottom: 50px; 
-        }
-
-        /* Top Bar & Floating Animation */
-        .top-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            width: 90%; 
-            max-width: 400px; 
-            margin-top: 20px; 
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .points-display { 
-            background: var(--card);
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: 1px solid var(--gold);
-            color: var(--gold); 
-            font-weight: bold; 
-            font-size: 1.2rem; 
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
-        }
-
-        /* Shop Items */
-        .shop-container { 
-            display: flex; 
-            gap: 12px; 
-            margin: 20px 0; 
-            padding: 15px; 
-            background: var(--card); 
-            backdrop-filter: blur(10px);
-            border-radius: 25px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            overflow-x: auto; 
-            width: 90%; 
-            max-width: 400px; 
-            scrollbar-width: none; 
-        }
-
-        .icon-item { 
-            min-width: 65px; 
-            height: 75px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            background: rgba(0,0,0,0.3); 
-            border-radius: 18px; 
-            border: 2px solid transparent; 
-            cursor: pointer; 
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        .icon-item:hover { transform: scale(1.1); }
-        .icon-item.active { 
-            background: var(--neon); 
-            color: black; 
-            box-shadow: var(--glow); 
-            border-color: white;
-        }
-
-        /* Level Buttons */
-        .level-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 320px; margin-bottom: 20px; }
-        .lvl-btn { 
-            padding: 12px; 
-            border: 2px solid #333; 
-            background: var(--card); 
-            color: white; 
-            border-radius: 30px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.3s; 
-        }
-        .lvl-btn.active { 
-            background: linear-gradient(45deg, var(--neon), #00a2ff); 
-            color: black; 
-            border-color: transparent;
-            box-shadow: var(--glow);
-        }
-
-        /* Neon Grid Container */
-        .grid-container { 
-            position: relative; 
-            padding: 15px; 
-            border: 4px solid var(--neon); 
-            border-radius: 30px; 
-            background: rgba(0, 0, 0, 0.6); 
-            box-shadow: inset 0 0 20px var(--neon), 0 0 20px rgba(0, 242, 255, 0.2);
-            animation: pulse-border 2s infinite;
-        }
-
-        @keyframes pulse-border {
-            0%, 100% { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
-            50% { border-color: #008cff; box-shadow: 0 0 30px #008cff; }
-        }
-
-        .grid { display: grid; grid-template-columns: repeat(5, 60px); grid-template-rows: repeat(5, 60px); gap: 8px; }
+        :root { --neon: #00f2ff; --pink: #ff0055; --gold: #ffcc00; --bg: #0a0a12; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
-        .cell { 
-            width: 60px; 
-            height: 60px; 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 15px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 28px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.3s; 
-        }
+        .header { margin-top: 20px; text-shadow: 0 0 15px var(--neon); }
+        .score-box { font-size: 1.5rem; color: var(--gold); margin: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; display: inline-block; }
 
-        .cell:hover { 
-            background: rgba(255, 255, 255, 0.1); 
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
+        /* Timer Style */
+        .timer-text { font-size: 0.9rem; color: #ff4444; margin-top: 5px; font-weight: bold; }
 
-        .cell.X { color: var(--x-color); text-shadow: 0 0 15px var(--x-color); animation: appear 0.3s ease-out; }
-        .cell.O { color: var(--neon); text-shadow: 0 0 15px var(--neon); animation: appear 0.3s ease-out; }
+        /* Game UI */
+        .candy-grid { display: grid; grid-template-columns: repeat(6, 50px); gap: 5px; justify-content: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; border: 2px solid var(--pink); }
+        .candy { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; background: rgba(0,0,0,0.3); border-radius: 10px; }
+        .candy:active { transform: scale(0.9); }
 
-        @keyframes appear {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
+        .btn-main { padding: 12px 25px; border: 2px solid var(--neon); background: transparent; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; margin: 10px; }
+        .btn-main:disabled { border-color: #555; color: #555; cursor: not-allowed; }
 
-        /* Animated Buttons */
-        .btn-restart { 
-            margin-top: 30px; 
-            padding: 15px 45px; 
-            background: transparent; 
-            border: 2px solid var(--neon); 
-            border-radius: 40px; 
-            color: var(--neon); 
-            font-weight: bold; 
-            cursor: pointer; 
-            letter-spacing: 2px;
-            transition: 0.3s;
-            text-transform: uppercase;
-        }
-
-        .btn-restart:hover { background: var(--neon); color: black; box-shadow: var(--glow); }
-
-        #status { font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
-
+        /* Lucky Spin Modal */
+        #spin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .spin-box { background: #111; border: 3px solid var(--gold); padding: 30px; border-radius: 30px; width: 85%; max-width: 350px; }
+        #wheel { width: 200px; height: 200px; border: 5px solid var(--gold); border-radius: 50%; margin: 20px auto; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); background: conic-gradient(#222 0deg, #333 60deg, #222 120deg, #333 180deg, #222 240deg, #333 300deg); }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <h1 style="font-size: 1.5rem; letter-spacing: 2px;">BATTLE HUB <span style="color:var(--neon)">PRO</span></h1>
-        <div class="points-display">🪙 <span id="total-points">0</span></div>
+    <h1 class="header">BATTLE HUB <span style="color:var(--neon)">PRO</span></h1>
+    <div class="score-box">🪙 Points: <span id="points-display">0</span></div>
+
+    <div id="candy-section">
+        <div class="candy-grid" id="board"></div>
+        <button class="btn-main" onclick="initCandy()">SHUFFLE</button>
+        <button class="btn-main" id="spin-trigger-btn" onclick="openSpin()">LUCKY SPIN 🎁</button>
+        <div id="main-timer" class="timer-text"></div>
     </div>
 
-    <div class="shop-container" id="shop"></div>
-
-    <div class="level-selector">
-        <button class="lvl-btn active" onclick="setLevel('easy', this)">EASY AI</button>
-        <button class="lvl-btn" onclick="setLevel('hard', this)">HARD AI</button>
-    </div>
-
-    <div id="status" style="margin-bottom:20px; color: var(--neon);">PLAYER O TURN</div>
-
-    <div class="grid-container">
-        <div class="grid" id="board"></div>
-    </div>
-
-    <button class="btn-restart" onclick="resetGame()">Restart Mission</button>
-
-    <div id="chest-trigger" style="position: fixed; right: 20px; bottom: 30px; font-size: 3.5rem; cursor: pointer; animation: bounce 2s infinite; filter: drop-shadow(0 0 10px var(--gold));" onclick="openSpinWheel()">🎁</div>
-
-    <div id="spin-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div style="background: #111; border: 3px solid var(--gold); padding: 30px; border-radius: 30px; text-align: center;">
-            <h2 style="color:var(--gold)">LUCKY SPIN</h2>
-            <div id="wheel" style="width: 200px; height: 200px; border: 5px solid var(--gold); border-radius: 50%; margin: 20px auto; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); background: conic-gradient(#222 0deg, #333 60deg, #222 120deg, #333 180deg, #222 240deg, #333 300deg);"></div>
-            <button class="lvl-btn" id="spin-btn" style="border-color: var(--gold); color: var(--gold);" onclick="startSpin()">SPIN NOW</button>
-            <p id="spin-timer" style="margin-top:10px; font-size: 0.8rem;"></p>
-            <button onclick="document.getElementById('spin-overlay').style.display='none'" style="background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Close</button>
+    <div id="spin-modal">
+        <div class="spin-box">
+            <h2 style="color:var(--gold)">DAILY LUCKY SPIN</h2>
+            <div id="wheel"></div>
+            <button class="btn-main" id="spin-btn" style="border-color:var(--gold); color:var(--gold);" onclick="startSpin()">SPIN NOW</button>
+            <div id="modal-timer" class="timer-text"></div>
+            <button onclick="closeSpin()" style="background:none; border:none; color:gray; margin-top:15px; cursor:pointer;">Close</button>
         </div>
     </div>
 
     <script>
-        const clickSound = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3');
-        const winSound = new Audio('https://www.soundjay.com/human/sounds/applause-01.mp3');
-        const loseSound = new Audio('https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3');
-        const spinSound = new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3');
+        let points = parseInt(localStorage.getItem('sadaf_points')) || 100;
+        let lastSpinTime = parseInt(localStorage.getItem('sadaf_last_spin')) || 0;
 
-        let points = parseInt(localStorage.getItem('sadaf_points')) || 0;
-        let unlockedIcons = JSON.parse(localStorage.getItem('sadaf_unlocked')) || ['O'];
-        let activeIcon = localStorage.getItem('sadaf_active_icon') || 'O';
-        let lastSpin = localStorage.getItem('sadaf_last_spin') || 0;
-
-        const shopIcons = [
-            {char: 'O', price: 0}, {char: '🔥', price: 100}, {char: '⚡', price: 200},
-            {char: '❄️', price: 300}, {char: '💎', price: 400}, {char: '👑', price: 500}
-        ];
-
-        let board = Array(25).fill(null);
-        let gameActive = true;
-        let difficulty = 'easy';
-
-        function updateUI() {
-            document.getElementById('total-points').innerText = points;
-            renderShop();
+        function updateDisplay() {
+            document.getElementById('points-display').innerText = points;
+            localStorage.setItem('sadaf_points', points);
+            check24hTimer();
         }
 
-        function renderShop() {
-            const shop = document.getElementById('shop');
-            shop.innerHTML = '';
-            shopIcons.forEach(item => {
-                const isUnlocked = unlockedIcons.includes(item.char);
-                const div = document.createElement('div');
-                div.className = `icon-item ${isUnlocked ? 'unlocked' : ''} ${activeIcon === item.char ? 'active' : ''}`;
-                div.innerHTML = `<span>${item.char}</span><span style="font-size:0.6rem;">${isUnlocked ? 'OWN' : item.price}</span>`;
-                div.onclick = () => {
-                    if(isUnlocked) { activeIcon = item.char; localStorage.setItem('sadaf_active_icon', activeIcon); clickSound.play(); }
-                    else if(points >= item.price) {
-                        points -= item.price; unlockedIcons.push(item.char); activeIcon = item.char;
-                        localStorage.setItem('sadaf_points', points);
-                        localStorage.setItem('sadaf_unlocked', JSON.stringify(unlockedIcons));
-                        localStorage.setItem('sadaf_active_icon', activeIcon);
-                        spinSound.play(); confetti();
-                    }
-                    updateUI();
-                };
-                shop.appendChild(div);
-            });
+        // --- 24 Hour Timer Logic ---
+        function check24hTimer() {
+            const now = Date.now();
+            const dayInMs = 24 * 60 * 60 * 1000;
+            const timeLeft = dayInMs - (now - lastSpinTime);
+
+            const spinBtn = document.getElementById('spin-btn');
+            const triggerBtn = document.getElementById('spin-trigger-btn');
+            const mainTimer = document.getElementById('main-timer');
+            const modalTimer = document.getElementById('modal-timer');
+
+            if (timeLeft > 0) {
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const mins = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                const timerStr = `Next Spin in: ${hours}h ${mins}m ${secs}s`;
+                mainTimer.innerText = timerStr;
+                modalTimer.innerText = timerStr;
+                spinBtn.disabled = true;
+                spinBtn.innerText = "LOCKED";
+            } else {
+                mainTimer.innerText = "Ready to Spin!";
+                modalTimer.innerText = "Available Now!";
+                spinBtn.disabled = false;
+                spinBtn.innerText = "SPIN NOW";
+            }
         }
 
-        function openSpinWheel() { document.getElementById('spin-overlay').style.display='flex'; clickSound.play(); }
+        setInterval(check24hTimer, 1000);
+
+        // --- Spin Logic ---
+        function openSpin() { document.getElementById('spin-modal').style.display = 'flex'; }
+        function closeSpin() { document.getElementById('spin-modal').style.display = 'none'; }
 
         function startSpin() {
+            const wheel = document.getElementById('wheel');
             const deg = 3600 + Math.random() * 3600;
-            document.getElementById('wheel').style.transform = `rotate(${deg}deg)`;
-            spinSound.play();
+            wheel.style.transform = `rotate(${deg}deg)`;
+            document.getElementById('spin-btn').disabled = true;
+
             setTimeout(() => {
-                points += 50; localStorage.setItem('sadaf_points', points);
-                updateUI(); alert("You won 50 coins!"); confetti();
+                const winAmount = [50, 100, 20, 200, 10, 500][Math.floor(Math.random()*6)];
+                points += winAmount;
+                lastSpinTime = Date.now();
+                localStorage.setItem('sadaf_last_spin', lastSpinTime);
+                
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                alert(`Sweet! You won ${winAmount} points!`);
+                updateDisplay();
+                closeSpin();
             }, 4000);
         }
 
-        function initBoard() {
+        // --- Candy Match Logic (Simple) ---
+        const icons = ['🍭', '🍬', '🍩', '🍫', '🧁', '🍪'];
+        function initCandy() {
             const b = document.getElementById('board');
-            b.innerHTML = ''; board = Array(25).fill(null);
-            for(let i=0; i<25; i++) {
-                const c = document.createElement('div');
-                c.className = 'cell';
-                c.onclick = () => playerMove(i);
-                b.appendChild(c);
+            b.innerHTML = '';
+            for(let i=0; i<36; i++) {
+                const d = document.createElement('div');
+                d.className = 'candy';
+                d.innerText = icons[Math.floor(Math.random()*icons.length)];
+                d.onclick = () => {
+                    points += 2;
+                    d.style.transform = "scale(0)";
+                    setTimeout(() => { d.style.transform = "scale(1)"; d.innerText = icons[Math.floor(Math.random()*icons.length)]; }, 300);
+                    updateDisplay();
+                };
+                b.appendChild(d);
             }
         }
 
-        function playerMove(i) {
-            if(!gameActive || board[i]) return;
-            board[i] = activeIcon;
-            clickSound.play(); render();
-            if(checkWin(board, activeIcon)) endGame("MISSION PASSED! 🎉");
-            else { document.getElementById('status').innerText = "AI THINKING..."; setTimeout(aiMove, 600); }
-        }
-
-        function aiMove() {
-            if(!gameActive) return;
-            let free = board.map((v,i)=>v===null?i:null).filter(v=>v!==null);
-            let move = free[Math.floor(Math.random()*free.length)];
-            board[move] = 'X'; clickSound.play(); render();
-            if(checkWin(board, 'X')) endGame("MISSION FAILED! 🤖");
-            else document.getElementById('status').innerText = "YOUR TURN (" + activeIcon + ")";
-        }
-
-        function checkWin(b, p) {
-            for (let i = 0; i < 25; i++) {
-                if (b[i] !== p) continue;
-                let r = Math.floor(i / 5), c = i % 5;
-                if (c <= 1 && b[i+1]===p && b[i+2]===p && b[i+3]===p) return true;
-                if (r <= 1 && b[i+5]===p && b[i+10]===p && b[i+15]===p) return true;
-                if (r <= 1 && c <= 1 && b[i+6]===p && b[i+12]===p && b[i+18]===p) return true;
-                if (r <= 1 && c >= 3 && b[i+4]===p && b[i+8]===p && b[i+12]===p) return true;
-            }
-            return false;
-        }
-
-        function render() {
-            const cells = document.querySelectorAll('.cell');
-            board.forEach((v, i) => {
-                cells[i].innerText = v || '';
-                cells[i].className = `cell ${v === 'X' ? 'X' : (v ? 'O' : '')}`;
-            });
-        }
-
-        function endGame(msg) {
-            gameActive = false;
-            document.getElementById('status').innerText = msg;
-            if(msg.includes("PASSED")) { winSound.play(); confetti(); points += 10; localStorage.setItem('sadaf_points', points); updateUI(); }
-            else loseSound.play();
-            setTimeout(resetGame, 3000);
-        }
-
-        function resetGame() { gameActive = true; document.getElementById('status').innerText = "YOUR TURN"; initBoard(); }
-        function setLevel(lvl, btn) { 
-            difficulty = lvl; 
-            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            resetGame();
-        }
-
-        window.onload = () => { initBoard(); updateUI(); };
+        window.onload = () => {
+            updateDisplay();
+            initCandy();
+        };
     </script>
 </body>
 </html>
