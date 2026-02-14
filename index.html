@@ -3,139 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Hub Pro - Floating UI</title>
+    <title>Sadaf Hub Pro | Master Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --neon-blue: #00f2ff;
             --neon-pink: #ff00ff;
-            --bg: #05050a;
             --gold: #ffcc00;
-            --glass: rgba(255, 255, 255, 0.1);
+            --bg: #05050a;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             background: var(--bg);
             color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Rajdhani', sans-serif;
             margin: 0;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
         }
 
-        /* --- Preview / Home Screen with Up-Down Animation --- */
-        #preview-screen {
+        /* --- Login/Identity Screen --- */
+        #login-screen {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, #111 0%, #05050a 100%);
-            z-index: 3000;
+            background: var(--bg);
+            z-index: 10000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: 0.8s ease-in-out;
+            transition: 0.8s;
         }
 
-        .floating-title {
-            font-size: 2.8rem;
-            letter-spacing: 10px;
-            font-weight: 900;
-            color: white;
-            text-shadow: 0 0 20px var(--neon-blue);
-            margin-bottom: 60px;
-            animation: floatUp 3s ease-in-out infinite; /* Floating Title */
+        .login-box {
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--neon-blue);
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
         }
 
-        .floating-title span {
-            color: var(--neon-pink);
-            text-shadow: 0 0 20px var(--neon-pink);
-        }
-
-        .btn-start-large {
-            padding: 22px 60px;
-            font-size: 2rem;
-            border: 3px solid var(--neon-blue);
-            border-radius: 60px;
+        .login-input {
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #333;
             background: transparent;
-            color: var(--neon-blue);
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 20px var(--neon-blue);
-            text-transform: uppercase;
-            animation: floatDown 3s ease-in-out infinite; /* Floating Button */
-            transition: 0.3s;
+            color: white;
+            font-size: 1.2rem;
+            width: 100%;
+            margin: 20px 0;
+            text-align: center;
+            outline: none;
         }
 
-        .btn-start-large:hover {
-            background: var(--neon-blue);
-            color: black;
-            box-shadow: 0 0 50px var(--neon-blue);
+        .login-input:focus { border-color: var(--neon-blue); }
+
+        /* --- Admin Control Layer --- */
+        #admin-dashboard {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
         }
 
-        /* Keyframes for Up-Down Movement */
-        @keyframes floatUp {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        .admin-panel {
+            background: rgba(255, 0, 0, 0.05);
+            border: 2px dashed red;
+            padding: 30px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 400px;
         }
 
-        @keyframes floatDown {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(20px) scale(1.05); }
-        }
-
-        /* --- Main Game UI --- */
+        /* --- Main UI --- */
         .header {
             width: 100%;
-            padding: 15px 25px;
+            padding: 15px;
+            background: var(--glass);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-tag {
+            width: 100%;
+            background: rgba(0, 242, 255, 0.1);
+            font-size: 0.8rem;
+            padding: 5px;
+            color: var(--neon-blue);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            width: 90vw;
-            max-width: 380px;
-            padding: 15px;
-            background: var(--glass);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin: 30px 0;
+            gap: 8px;
+            width: 92vw;
+            max-width: 400px;
+            margin: 20px auto;
+            background: rgba(255,255,255,0.02);
+            padding: 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 242, 255, 0.2);
         }
 
         .cell {
             aspect-ratio: 1;
-            background: rgba(255,255,255,0.02);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            font-weight: 900;
-            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 1.8rem;
             cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.2s;
         }
 
-        .btn-smart {
-            background: var(--glass);
-            border: 1px solid var(--neon-blue);
-            color: white;
-            padding: 12px 25px;
+        .btn-main {
+            padding: 10px 20px;
             border-radius: 12px;
-            font-weight: bold;
+            border: 1px solid var(--neon-blue);
+            background: transparent;
+            color: white;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
             cursor: pointer;
             transition: 0.3s;
         }
 
-        /* Modal / Spinner */
+        .btn-main:hover { background: var(--neon-blue); color: black; }
+
+        /* --- Spinner Animation --- */
+        .wheel-pro {
+            width: 250px;
+            height: 250px;
+            border: 8px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            transition: 10s cubic-bezier(0.1, 0, 0.1, 1);
+            background: radial-gradient(circle, #222, #000);
+        }
+
+        /* --- Modals --- */
         .modal {
             position: fixed;
             inset: 0;
@@ -144,90 +174,211 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(15px);
+            z-index: 5000;
         }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 10px;
+            width: 100%;
+        }
+
+        @keyframes floatTitle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .logo-anim { animation: floatTitle 3s infinite ease-in-out; }
     </style>
 </head>
 <body>
 
-    <div id="preview-screen">
-        <h1 class="floating-title">SADAF HUB <span>PRO</span></h1>
-        <button class="btn-start-large" onclick="enterGame()">START MISSION</button>
-        <p style="margin-top: 40px; color: #555; letter-spacing: 2px;">READY TO DOMINATE?</p>
+    <div id="login-screen">
+        <div class="login-box logo-anim">
+            <h1 style="font-family: 'Orbitron'; color: var(--neon-blue); margin: 0;">SADAF HUB PRO</h1>
+            <p style="color: #666; font-size: 0.8rem; letter-spacing: 3px;">ULTIMATE MASTER EDITION</p>
+            <input type="text" id="username-input" class="login-input" placeholder="Enter Your Name...">
+            <button class="btn-main" style="width: 100%; font-size: 1.1rem; padding: 15px;" onclick="saveIdentity()">VERIFY LOGIN</button>
+        </div>
+    </div>
+
+    <div id="admin-dashboard">
+        <div class="admin-panel">
+            <h2 style="color: red; font-family: 'Orbitron';">BOSS COMMAND CENTER</h2>
+            <p style="font-size: 0.8rem;">Target User: <span id="admin-target-view"></span></p>
+            <input type="number" id="gift-amt" class="login-input" style="border-color: red;" placeholder="Enter Coins...">
+            <button class="btn-main" style="border-color: red; background: red; width: 100%; margin-bottom: 10px;" onclick="addCoinsAdmin()">GIFT COINS</button>
+            <button class="btn-main" style="border-color: var(--gold); width: 100%;" onclick="slashShopPrices()">SLASH PRICES (1 Pts)</button>
+        </div>
+        <button class="btn-main" style="margin-top: 40px; border-color: white;" onclick="closeAdmin()">BACK TO MISSION</button>
     </div>
 
     <div class="header">
-        <div style="font-weight:bold; color:var(--neon-blue);">SADAF HUB</div>
-        <button class="btn-smart" style="border-color: var(--gold); color: var(--gold);" onclick="openSpinner()">🎁 GIFT</button>
+        <button class="btn-main" onclick="openShop()">🛒 SHOP</button>
+        <div style="text-align: center;">
+            <div style="color: var(--gold); font-weight: bold; font-size: 1.2rem;">🪙 <span id="pts-count">0</span></div>
+        </div>
+        <button id="boss-btn" class="btn-main" style="display: none; border-color: red; color: red;" onclick="openAdmin()">⚡ BOSS</button>
+        <button class="btn-main" style="border-color: var(--gold); color: var(--gold);" onclick="openSpin()">🎁 GIFT</button>
     </div>
 
-    <div style="margin-top: 20px; font-size: 1.2rem;">🪙 <span id="pts" style="color:var(--gold)">0</span> Pts</div>
+    <div class="user-tag">
+        Verified: <span id="user-display-tag"></span>
+    </div>
 
-    <div class="grid" id="board"></div>
+    <div style="margin-top: 20px; color: var(--neon-pink); font-weight: bold; letter-spacing: 2px;">
+        MODE: <span id="mode-text">HARD AI</span>
+    </div>
 
-    <div id="status" style="color: var(--neon-pink); font-weight: bold; margin-bottom: 20px;">YOUR TURN (O)</div>
-    <button class="btn-smart" onclick="resetGame()">RESTART MISSION</button>
+    <div class="grid" id="game-grid"></div>
 
-    <div id="modal-spinner" class="modal">
-        <h2 style="color:var(--gold)">DAILY REWARD</h2>
-        <div id="wheel" style="font-size: 4rem; margin: 30px 0;">🎁</div>
-        <button id="spin-btn" class="btn-smart" style="border-color: var(--gold); width: 200px;" onclick="startSpin()">SPIN NOW</button>
-        <div id="timer" style="margin-top: 20px; color: var(--neon-pink); font-family: monospace;"></div>
-        <button class="btn-smart" style="margin-top: 40px; border-color: white;" onclick="closeSpinner()">BACK</button>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button class="btn-main" onclick="changeMode('easy')">EASY</button>
+        <button class="btn-main" onclick="changeMode('hard')">HARD</button>
+        <button class="btn-main" onclick="changeMode('pvp')">2P</button>
+        <button class="btn-main" style="border-color: #1877f2; color: #1877f2;" onclick="fbInvite()">INVITE</button>
+    </div>
+
+    <div id="shop-modal" class="modal">
+        <h2 style="color: var(--neon-blue); font-family: 'Orbitron';">PREMIUM SHOP</h2>
+        <div class="shop-grid" id="shop-list"></div>
+        <button class="btn-main" style="margin-top: 20px; width: 150px;" onclick="closeModal('shop-modal')">CLOSE</button>
+    </div>
+
+    <div id="spin-modal" class="modal">
+        <h2 style="color: var(--gold); font-family: 'Orbitron';">LUCKY REWARD</h2>
+        <div id="wheel" class="wheel-pro">🎁</div>
+        <button id="spin-go" class="btn-main" style="margin-top: 30px; font-size: 1.2rem; border-color: var(--gold);" onclick="startMasterSpin()">SPIN NOW (10s)</button>
+        <button class="btn-main" style="margin-top: 20px;" onclick="closeModal('spin-modal')">CLOSE</button>
     </div>
 
     <script>
+        // --- Globals ---
+        let pts = parseInt(localStorage.getItem('sadaf_pts')) || 1000;
         let board = Array(25).fill(null);
-        let pts = parseInt(localStorage.getItem('sadaf_pts')) || 100;
-        let active = true;
+        let currentUser = "";
+        let p1Icon = 'O', p2Icon = 'X';
+        let isBoss = false;
+        let difficulty = 'hard';
+        let isLocked = false;
+        let priceScale = 1;
 
-        function updateUI() {
-            document.getElementById('pts').innerText = pts;
-            localStorage.setItem('sadaf_pts', pts);
+        // --- Sound System ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(f, t, d) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + d);
         }
 
-        function enterGame() {
-            const screen = document.getElementById('preview-screen');
-            screen.style.opacity = '0';
-            screen.style.transform = 'scale(1.2)';
-            setTimeout(() => {
-                screen.style.display = 'none';
-                createBoard();
-                updateUI();
-                checkTimer();
-            }, 800);
+        // --- Auth System ---
+        function saveIdentity() {
+            const val = document.getElementById('username-input').value.trim();
+            if(!val) return alert("Enter Name!");
+            localStorage.setItem('sadaf_username', val);
+            startHub(val);
         }
 
-        function createBoard() {
-            const el = document.getElementById('board');
-            el.innerHTML = '';
-            board.forEach((_, i) => {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.id = `c-${i}`;
-                cell.onclick = () => {
-                    if(!active || board[i]) return;
-                    board[i] = 'O'; cell.innerText = 'O'; cell.style.color = 'var(--neon-blue)';
-                    if(checkWin('O')) { confetti(); pts += 20; updateUI(); active = false; document.getElementById('status').innerText = "MISSION PASSED!"; }
-                    else {
-                        active = false; document.getElementById('status').innerText = "AI THINKING...";
-                        setTimeout(aiMove, 600);
-                    }
-                };
-                el.appendChild(cell);
+        window.onload = () => {
+            const saved = localStorage.getItem('sadaf_username');
+            if(saved) startHub(saved);
+        };
+
+        function startHub(name) {
+            currentUser = name;
+            document.getElementById('login-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('login-screen').style.display = 'none', 800);
+            
+            document.getElementById('user-display-tag').innerText = name;
+            if(name === "SIYAMBOSS") {
+                isBoss = true;
+                document.getElementById('boss-btn').style.display = 'block';
+                document.getElementById('user-display-tag').innerHTML += " <span style='color:red'>[ADMIN]</span>";
+                confetti();
+            }
+            updatePts();
+            renderBoard();
+        }
+
+        // --- Admin Commands ---
+        function openAdmin() { 
+            document.getElementById('admin-dashboard').style.display = 'flex'; 
+            document.getElementById('admin-target-view').innerText = currentUser;
+        }
+        function closeAdmin() { document.getElementById('admin-dashboard').style.display = 'none'; }
+        
+        function addCoinsAdmin() {
+            let amt = parseInt(document.getElementById('gift-amt').value);
+            if(!amt) return;
+            pts += amt; updatePts(); confetti();
+            alert(`BOSS, ${amt} Coins Added!`);
+        }
+
+        function slashShopPrices() {
+            priceScale = 0.001; 
+            alert("BOSS, Shop Prices are now 1 Coin!");
+            closeAdmin();
+        }
+
+        // --- Game Logic ---
+        function renderBoard() {
+            const container = document.getElementById('game-grid');
+            container.innerHTML = '';
+            board.forEach((v, i) => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                c.innerText = v || '';
+                if(v === p1Icon) c.style.color = 'var(--neon-blue)';
+                if(v === p2Icon) c.style.color = 'var(--neon-pink)';
+                c.onclick = () => handleTap(i);
+                container.appendChild(c);
             });
         }
 
-        function aiMove() {
-            let m = board.indexOf(null); 
-            if(m !== -1) {
-                board[m] = 'X'; 
-                const c = document.getElementById(`c-${m}`);
-                c.innerText = 'X'; c.style.color = 'var(--neon-pink)';
-                if(checkWin('X')) { document.getElementById('status').innerText = "MISSION FAILED!"; active = false; }
-                else { active = true; document.getElementById('status').innerText = "YOUR TURN (O)"; }
+        function handleTap(i) {
+            if(isLocked || board[i]) return;
+            playSfx(400, 'sine', 0.1);
+            board[i] = p1Icon;
+            renderBoard();
+            if(checkWin(p1Icon)) return end("YOU WON!");
+            
+            if(difficulty === 'pvp') {
+                p1Icon = (p1Icon === 'O') ? 'X' : 'O';
+            } else {
+                isLocked = true;
+                setTimeout(aiTurn, 600);
             }
+        }
+
+        function aiTurn() {
+            let move = -1;
+            if(difficulty === 'hard') {
+                move = findBest(p2Icon) || findBest(p1Icon) || board.indexOf(null);
+            } else {
+                move = board.indexOf(null);
+            }
+
+            if(move !== -1) {
+                board[move] = p2Icon;
+                playSfx(300, 'sine', 0.1);
+                renderBoard();
+                if(checkWin(p2Icon)) end("AI WON!");
+                else isLocked = false;
+            }
+        }
+
+        function findBest(p) {
+            for(let i=0; i<25; i++) {
+                if(!board[i]) {
+                    board[i] = p;
+                    if(checkWin(p)) { board[i] = null; return i; }
+                    board[i] = null;
+                }
+            }
+            return null;
         }
 
         function checkWin(p) {
@@ -236,39 +387,71 @@
                 let r = Math.floor(i/5), c = i%5;
                 if (c < 3 && board[i+1]===p && board[i+2]===p) return true;
                 if (r < 3 && board[i+5]===p && board[i+10]===p) return true;
+                if (r < 3 && c < 3 && board[i+6]===p && board[i+12]===p) return true;
+                if (r < 3 && c > 1 && board[i+4]===p && board[i+8]===p) return true;
             }
             return false;
         }
 
-        function openSpinner() { document.getElementById('modal-spinner').style.display = 'flex'; checkTimer(); }
-        function closeSpinner() { document.getElementById('modal-spinner').style.display = 'none'; }
+        // --- Features ---
+        function startMasterSpin() {
+            const last = localStorage.getItem('sadaf_spin_time');
+            if(!isBoss && last && (Date.now() - last < 86400000)) return alert("Wait 24 Hours!");
+            
+            const wheel = document.getElementById('wheel');
+            const btn = document.getElementById('spin-go');
+            btn.disabled = true;
+            playSfx(150, 'square', 2);
+            wheel.style.transform = "rotate(3600deg)";
 
-        function checkTimer() {
-            const last = localStorage.getItem('last_spin');
-            const btn = document.getElementById('spin-btn');
-            if(last) {
-                const diff = Date.now() - parseInt(last);
-                const day = 24 * 60 * 60 * 1000;
-                if(diff < day) {
-                    btn.disabled = true; btn.innerText = "LOCKED";
-                    const rem = day - diff;
-                    const h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
-                    document.getElementById('timer').innerText = `NEXT SPIN: ${h}:${m}:${s}`;
-                } else {
-                    btn.disabled = false; btn.innerText = "SPIN NOW";
-                    document.getElementById('timer').innerText = "REWARD READY!";
-                }
-            }
+            setTimeout(() => {
+                let win = isBoss ? 2000 : 100;
+                pts += win; updatePts();
+                localStorage.setItem('sadaf_spin_time', Date.now());
+                confetti(); alert(`Success! +${win} Coins`);
+                btn.disabled = false;
+                wheel.style.transform = "rotate(0deg)";
+            }, 10000);
         }
 
-        function startSpin() {
-            pts += Math.floor(Math.random() * 41) + 10;
-            localStorage.setItem('last_spin', Date.now().toString());
-            updateUI(); confetti(); checkTimer();
-            alert("Congrats! Points Added.");
+        function openShop() {
+            document.getElementById('shop-modal').style.display = 'flex';
+            const list = document.getElementById('shop-list');
+            list.innerHTML = '';
+            const items = [{n:'Robot', i:'🤖', c:500}, {n:'Ghost', i:'👻', c:1000}, {n:'Dragon', i:'🐉', c:3000}, {n:'Diamond', i:'💎', c:9999}];
+            items.forEach(item => {
+                let finalCost = Math.max(1, Math.floor(item.c * priceScale));
+                list.innerHTML += `<div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; border:1px solid #333;">
+                    <div style="font-size:2.5rem">${item.i}</div>
+                    <div style="color:var(--gold); margin:5px 0;">${finalCost} Pts</div>
+                    <button class="btn-main" onclick="useIcon('${item.i}', ${finalCost})">EQUIP</button>
+                </div>`;
+            });
         }
 
-        function resetGame() { board = Array(25).fill(null); active = true; document.getElementById('status').innerText = "YOUR TURN (O)"; createBoard(); }
+        function useIcon(icon, cost) {
+            if(pts >= cost) {
+                if(!isBoss) pts -= cost;
+                p1Icon = icon; updatePts(); closeModal('shop-modal'); renderBoard();
+                playSfx(600, 'sine', 0.2);
+            } else alert("Not Enough Coins!");
+        }
+
+        function fbInvite() {
+            const url = window.location.href;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=I have ${pts} coins in Sadaf Hub Pro! Challenge me now!`, '_blank');
+        }
+
+        function end(m) { 
+            alert(m); 
+            if(m === "YOU WON!") { pts += 50; updatePts(); confetti(); }
+            board.fill(null); isLocked = false; renderBoard(); 
+        }
+
+        function updatePts() { document.getElementById('pts-count').innerText = pts; localStorage.setItem('sadaf_pts', pts); }
+        function changeMode(m) { difficulty = m; document.getElementById('mode-text').innerText = m.toUpperCase(); board.fill(null); renderBoard(); }
+        function openSpin() { document.getElementById('spin-modal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
 </html>
