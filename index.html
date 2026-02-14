@@ -3,141 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Battle Hub Pro - 24h Update</title>
+    <title>Sadaf Ultimate Gaming Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --neon: #00f2ff; --pink: #ff0055; --gold: #ffcc00; --bg: #0a0a12; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
+        :root { --neon: #00f2ff; --pink: #ff0055; --gold: #ffcc00; --bg: #050510; }
+        body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; margin: 0; overflow-x: hidden; }
         
-        .header { margin-top: 20px; text-shadow: 0 0 15px var(--neon); }
-        .score-box { font-size: 1.5rem; color: var(--gold); margin: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; display: inline-block; }
+        /* Lobby UI */
+        #lobby { display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        .hero-title { font-size: 2.5rem; text-shadow: 0 0 20px var(--neon); margin-bottom: 30px; }
+        
+        .game-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 400px; }
+        .game-card { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 2px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 25px; padding: 20px; 
+            text-align: left; position: relative;
+            overflow: hidden; transition: 0.4s; cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+        .game-card:hover { border-color: var(--neon); transform: translateY(-10px); background: rgba(255,255,255,0.1); }
+        .game-card h2 { margin: 0; font-size: 1.5rem; }
+        .game-card p { color: #aaa; font-size: 0.8rem; margin: 5px 0; }
+        .lvl-badge { position: absolute; right: 20px; top: 20px; background: var(--pink); padding: 5px 12px; border-radius: 15px; font-size: 0.7rem; font-weight: bold; }
 
-        /* Timer Style */
-        .timer-text { font-size: 0.9rem; color: #ff4444; margin-top: 5px; font-weight: bold; }
+        /* Game Screen */
+        .screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 100; flex-direction: column; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(0,0,0,0.5); }
+        
+        /* Bubble Shooter Area */
+        #bubble-canvas { background: #000; display: block; margin: 0 auto; border-radius: 20px; border: 3px solid var(--neon); max-width: 95%; }
+        
+        /* Candy Crush Area */
+        .candy-board { display: grid; grid-template-columns: repeat(7, 45px); gap: 5px; justify-content: center; margin: 20px auto; }
+        .candy { width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: 0.3s; }
+        .candy.active { transform: scale(1.2); border: 2px solid white; box-shadow: 0 0 15px white; }
 
-        /* Game UI */
-        .candy-grid { display: grid; grid-template-columns: repeat(6, 50px); gap: 5px; justify-content: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; border: 2px solid var(--pink); }
-        .candy { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; background: rgba(0,0,0,0.3); border-radius: 10px; }
-        .candy:active { transform: scale(0.9); }
+        /* Floating Coins */
+        .coins { color: var(--gold); font-weight: bold; font-size: 1.2rem; }
+        .btn-action { padding: 10px 25px; border-radius: 25px; border: none; background: var(--neon); color: black; font-weight: bold; cursor: pointer; }
 
-        .btn-main { padding: 12px 25px; border: 2px solid var(--neon); background: transparent; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; margin: 10px; }
-        .btn-main:disabled { border-color: #555; color: #555; cursor: not-allowed; }
-
-        /* Lucky Spin Modal */
-        #spin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .spin-box { background: #111; border: 3px solid var(--gold); padding: 30px; border-radius: 30px; width: 85%; max-width: 350px; }
-        #wheel { width: 200px; height: 200px; border: 5px solid var(--gold); border-radius: 50%; margin: 20px auto; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); background: conic-gradient(#222 0deg, #333 60deg, #222 120deg, #333 180deg, #222 240deg, #333 300deg); }
+        /* Navigation Buttons */
+        .home-btn { background: none; border: 1px solid white; color: white; padding: 5px 15px; border-radius: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h1 class="header">BATTLE HUB <span style="color:var(--neon)">PRO</span></h1>
-    <div class="score-box">🪙 Points: <span id="points-display">0</span></div>
+    <div id="lobby">
+        <h1 class="hero-title">SADAF <span style="color: var(--pink);">HUB</span></h1>
+        <div class="coins">🪙 <span id="lobby-pts">0</span></div>
+        <br>
+        <div class="game-grid">
+            <div class="game-card" onclick="openGame('bubble')">
+                <div class="lvl-badge">500 LVLS</div>
+                <h2>🌀 Bubble Pop</h2>
+                <p>Shoot & Match Colors</p>
+                <div style="font-size: 0.8rem; color: var(--neon);">Lvl: <span id="bubble-lvl-disp">1</span></div>
+            </div>
 
-    <div id="candy-section">
-        <div class="candy-grid" id="board"></div>
-        <button class="btn-main" onclick="initCandy()">SHUFFLE</button>
-        <button class="btn-main" id="spin-trigger-btn" onclick="openSpin()">LUCKY SPIN 🎁</button>
-        <div id="main-timer" class="timer-text"></div>
-    </div>
+            <div class="game-card" onclick="openGame('candy')">
+                <div class="lvl-badge">500 LVLS</div>
+                <h2>🍬 Soda Crush</h2>
+                <p>Sweet Puzzle Adventure</p>
+                <div style="font-size: 0.8rem; color: var(--pink);">Lvl: <span id="candy-lvl-disp">1</span></div>
+            </div>
 
-    <div id="spin-modal">
-        <div class="spin-box">
-            <h2 style="color:var(--gold)">DAILY LUCKY SPIN</h2>
-            <div id="wheel"></div>
-            <button class="btn-main" id="spin-btn" style="border-color:var(--gold); color:var(--gold);" onclick="startSpin()">SPIN NOW</button>
-            <div id="modal-timer" class="timer-text"></div>
-            <button onclick="closeSpin()" style="background:none; border:none; color:gray; margin-top:15px; cursor:pointer;">Close</button>
+            <div class="game-card" onclick="openGame('ttt')">
+                <div class="lvl-badge">PRO AI</div>
+                <h2>🎮 Battle Hub 5x5</h2>
+                <p>The Original Challenge</p>
+            </div>
         </div>
     </div>
 
+    <div id="game-screen" class="screen">
+        <div class="top-bar">
+            <button class="home-btn" onclick="exitGame()">🏠 Home</button>
+            <div id="game-title" style="font-weight: bold;">GAME</div>
+            <div class="coins">🪙 <span id="game-pts">0</span></div>
+        </div>
+        
+        <div style="margin: 10px; font-size: 1.2rem; color: var(--gold);">LEVEL <span id="active-lvl">1</span></div>
+        
+        <div id="game-render-area" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            </div>
+
+        <div id="super-card" style="display:none; background: var(--pink); padding: 10px; margin: 10px; border-radius: 10px; font-weight:bold;">
+            ✨ 2 SUPER CARDS ACTIVATED!
+        </div>
+
+        <button class="btn-action" style="margin-bottom: 30px;" onclick="completeLevel()">FINISH LEVEL</button>
+    </div>
+
     <script>
-        let points = parseInt(localStorage.getItem('sadaf_points')) || 100;
-        let lastSpinTime = parseInt(localStorage.getItem('sadaf_last_spin')) || 0;
-
-        function updateDisplay() {
-            document.getElementById('points-display').innerText = points;
-            localStorage.setItem('sadaf_points', points);
-            check24hTimer();
-        }
-
-        // --- 24 Hour Timer Logic ---
-        function check24hTimer() {
-            const now = Date.now();
-            const dayInMs = 24 * 60 * 60 * 1000;
-            const timeLeft = dayInMs - (now - lastSpinTime);
-
-            const spinBtn = document.getElementById('spin-btn');
-            const triggerBtn = document.getElementById('spin-trigger-btn');
-            const mainTimer = document.getElementById('main-timer');
-            const modalTimer = document.getElementById('modal-timer');
-
-            if (timeLeft > 0) {
-                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                const mins = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                
-                const timerStr = `Next Spin in: ${hours}h ${mins}m ${secs}s`;
-                mainTimer.innerText = timerStr;
-                modalTimer.innerText = timerStr;
-                spinBtn.disabled = true;
-                spinBtn.innerText = "LOCKED";
-            } else {
-                mainTimer.innerText = "Ready to Spin!";
-                modalTimer.innerText = "Available Now!";
-                spinBtn.disabled = false;
-                spinBtn.innerText = "SPIN NOW";
-            }
-        }
-
-        setInterval(check24hTimer, 1000);
-
-        // --- Spin Logic ---
-        function openSpin() { document.getElementById('spin-modal').style.display = 'flex'; }
-        function closeSpin() { document.getElementById('spin-modal').style.display = 'none'; }
-
-        function startSpin() {
-            const wheel = document.getElementById('wheel');
-            const deg = 3600 + Math.random() * 3600;
-            wheel.style.transform = `rotate(${deg}deg)`;
-            document.getElementById('spin-btn').disabled = true;
-
-            setTimeout(() => {
-                const winAmount = [50, 100, 20, 200, 10, 500][Math.floor(Math.random()*6)];
-                points += winAmount;
-                lastSpinTime = Date.now();
-                localStorage.setItem('sadaf_last_spin', lastSpinTime);
-                
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                alert(`Sweet! You won ${winAmount} points!`);
-                updateDisplay();
-                closeSpin();
-            }, 4000);
-        }
-
-        // --- Candy Match Logic (Simple) ---
-        const icons = ['🍭', '🍬', '🍩', '🍫', '🧁', '🍪'];
-        function initCandy() {
-            const b = document.getElementById('board');
-            b.innerHTML = '';
-            for(let i=0; i<36; i++) {
-                const d = document.createElement('div');
-                d.className = 'candy';
-                d.innerText = icons[Math.floor(Math.random()*icons.length)];
-                d.onclick = () => {
-                    points += 2;
-                    d.style.transform = "scale(0)";
-                    setTimeout(() => { d.style.transform = "scale(1)"; d.innerText = icons[Math.floor(Math.random()*icons.length)]; }, 300);
-                    updateDisplay();
-                };
-                b.appendChild(d);
-            }
-        }
-
-        window.onload = () => {
-            updateDisplay();
-            initCandy();
+        // State Management
+        let data = {
+            points: parseInt(localStorage.getItem('s_pts')) || 0,
+            bubbleLvl: parseInt(localStorage.getItem('s_blvl')) || 1,
+            candyLvl: parseInt(localStorage.getItem('s_clvl')) || 1,
+            activeGame: ''
         };
+
+        function updateLobby() {
+            document.getElementById('lobby-pts').innerText = data.points;
+            document.getElementById('bubble-lvl-disp').innerText = data.bubbleLvl;
+            document.getElementById('candy-lvl-disp').innerText = data.candyLvl;
+        }
+
+        function openGame(game) {
+            data.activeGame = game;
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            document.getElementById('game-pts').innerText = data.points;
+            
+            const area = document.getElementById('game-render-area');
+            area.innerHTML = '';
+            
+            if(game === 'bubble') {
+                document.getElementById('game-title').innerText = "BUBBLE POP";
+                document.getElementById('active-lvl').innerText = data.bubbleLvl;
+                area.innerHTML = '<canvas id="bubble-canvas" width="320" height="400"></canvas><p>Tap to Shoot!</p>';
+                checkSuperCard(data.bubbleLvl);
+            } 
+            else if(game === 'candy') {
+                document.getElementById('game-title').innerText = "SODA CRUSH";
+                document.getElementById('active-lvl').innerText = data.candyLvl;
+                area.innerHTML = '<div class="candy-board" id="c-board"></div>';
+                genCandyBoard();
+                checkSuperCard(data.candyLvl);
+            }
+            else {
+                document.getElementById('game-title').innerText = "BATTLE HUB 5X5";
+                area.innerHTML = '<p>Classic Tic-Tac-Toe loading...</p>';
+            }
+        }
+
+        function checkSuperCard(lvl) {
+            const sc = document.getElementById('super-card');
+            sc.style.display = (lvl % 10 === 0) ? 'block' : 'none';
+        }
+
+        function genCandyBoard() {
+            const board = document.getElementById('c-board');
+            const icons = ['🍭', '🍬', '🍩', '🍫', '🧁', '🍪', '💎'];
+            for(let i=0; i<49; i++) {
+                const div = document.createElement('div');
+                div.className = 'candy';
+                div.innerText = icons[Math.floor(Math.random() * 5)]; // Increase colors with level
+                div.onclick = () => {
+                    div.style.transform = "scale(1.3)";
+                    data.points += 5;
+                    document.getElementById('game-pts').innerText = data.points;
+                    setTimeout(() => div.style.transform = "scale(1)", 200);
+                };
+                board.appendChild(div);
+            }
+        }
+
+        function completeLevel() {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            
+            if(data.activeGame === 'bubble') data.bubbleLvl++;
+            if(data.activeGame === 'candy') data.candyLvl++;
+            
+            data.points += 50;
+            saveData();
+            openGame(data.activeGame); // Reload next level
+        }
+
+        function saveData() {
+            localStorage.setItem('s_pts', data.points);
+            localStorage.setItem('s_blvl', data.bubbleLvl);
+            localStorage.setItem('s_clvl', data.candyLvl);
+        }
+
+        function exitGame() {
+            document.getElementById('lobby').style.display = 'flex';
+            document.getElementById('game-screen').style.display = 'none';
+            updateLobby();
+        }
+
+        window.onload = updateLobby;
     </script>
 </body>
 </html>
