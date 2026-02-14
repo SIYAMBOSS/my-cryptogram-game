@@ -3,325 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaf Ultimate Gaming Hub - 500 Levels</title>
+    <title>Sadaf Hub Pro - Floating UI</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --neon: #00f2ff; --pink: #ff0055; --gold: #ffcc00; --bg: #0a0a12; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; text-align: center; overflow: hidden; user-select: none; }
-        
-        /* Lobby UI */
-        #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: radial-gradient(circle, #1a1a2e 0%, #0a0a12 100%); }
-        .hero-title { font-size: 2.5rem; text-shadow: 0 0 20px var(--neon); margin-bottom: 5px; }
-        .game-card { width: 85%; max-width: 320px; background: rgba(255,255,255,0.05); margin: 12px; padding: 20px; border-radius: 25px; border: 2px solid var(--neon); cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
-        .game-card:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon); background: rgba(255,255,255,0.1); }
-        .lvl-tag { position: absolute; right: 15px; top: 15px; background: var(--pink); font-size: 0.7rem; padding: 4px 10px; border-radius: 10px; font-weight: bold; }
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff00ff;
+            --bg: #05050a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
 
-        /* Shared Game Screen */
-        .screen { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; z-index: 100; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #111; border-bottom: 2px solid #333; }
-        .btn-home { background: var(--pink); border: none; color: white; padding: 8px 18px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .stats-bar { padding: 10px; color: var(--gold); font-weight: bold; font-size: 1.1rem; display: flex; justify-content: space-around; background: rgba(255,255,255,0.03); }
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
 
-        /* Candy Game Board */
-        .candy-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 10px; background: #151525; border-radius: 20px; margin: auto; max-width: 350px; }
-        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(255,255,255,0.05); border-radius: 10px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-        .cell.selected { border: 3px solid white; box-shadow: 0 0 15px white; transform: scale(1.1); z-index: 2; }
+        /* --- Preview / Home Screen with Up-Down Animation --- */
+        #preview-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #111 0%, #05050a 100%);
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.8s ease-in-out;
+        }
 
-        /* Tic Tac Toe Board */
-        .ttt-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 320px; margin: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 20px; }
-        .ttt-cell { aspect-ratio: 1; background: #1a1a2e; border: 2px solid var(--neon); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; border-radius: 15px; cursor: pointer; }
+        .floating-title {
+            font-size: 2.8rem;
+            letter-spacing: 10px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 0 20px var(--neon-blue);
+            margin-bottom: 60px;
+            animation: floatUp 3s ease-in-out infinite; /* Floating Title */
+        }
 
-        /* Bubble Shooter Canvas */
-        #canvas-wrap { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        canvas { background: #000; border: 3px solid var(--neon); border-radius: 20px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); width: 100%; max-width: 320px; }
+        .floating-title span {
+            color: var(--neon-pink);
+            text-shadow: 0 0 20px var(--neon-pink);
+        }
 
-        /* Super Card Alert */
-        .super-alert { background: linear-gradient(45deg, var(--pink), #ff00ff); padding: 10px; font-weight: bold; font-size: 0.9rem; border-radius: 10px; margin: 10px; display: none; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+        .btn-start-large {
+            padding: 22px 60px;
+            font-size: 2rem;
+            border: 3px solid var(--neon-blue);
+            border-radius: 60px;
+            background: transparent;
+            color: var(--neon-blue);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--neon-blue);
+            text-transform: uppercase;
+            animation: floatDown 3s ease-in-out infinite; /* Floating Button */
+            transition: 0.3s;
+        }
 
-        .footer-action { padding: 20px; background: #111; }
-        .next-btn { width: 80%; padding: 15px; background: var(--neon); border: none; border-radius: 30px; font-weight: bold; font-size: 1rem; color: #000; cursor: pointer; display: none; }
+        .btn-start-large:hover {
+            background: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 50px var(--neon-blue);
+        }
+
+        /* Keyframes for Up-Down Movement */
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes floatDown {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(20px) scale(1.05); }
+        }
+
+        /* --- Main Game UI --- */
+        .header {
+            width: 100%;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            width: 90vw;
+            max-width: 380px;
+            padding: 15px;
+            background: var(--glass);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 30px 0;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+
+        .btn-smart {
+            background: var(--glass);
+            border: 1px solid var(--neon-blue);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        /* Modal / Spinner */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(15px);
+        }
     </style>
 </head>
 <body>
 
-    <div id="lobby">
-        <h1 class="hero-title">SADAF <span style="color:var(--pink)">HUB</span></h1>
-        <p style="color:#888; margin-bottom: 20px;">Choose Your Mission</p>
-        
-        <div class="game-card" onclick="initCandy()">
-            <div class="lvl-tag">LVL <span id="clvl-tag">1</span></div>
-            <h2>🍭 Soda Crush</h2>
-            <p>Match 3 Jewels to Win</p>
-        </div>
-
-        <div class="game-card" onclick="initTTT()">
-            <div class="lvl-tag">PRO AI</div>
-            <h2>🎮 Battle Hub 5x5</h2>
-            <p>Vs Impossible Algorithm</p>
-        </div>
-
-        <div class="game-card" onclick="initBubble()">
-            <div class="lvl-tag">LVL <span id="blvl-tag">1</span></div>
-            <h2>🌀 Bubble Pop</h2>
-            <p>Clear the Board & Earn Coins</p>
-        </div>
-
-        <div style="margin-top:20px; color:var(--gold); font-weight:bold; font-size: 1.3rem;">🪙 COINS: <span id="total-coins">0</span></div>
+    <div id="preview-screen">
+        <h1 class="floating-title">SADAF HUB <span>PRO</span></h1>
+        <button class="btn-start-large" onclick="enterGame()">START MISSION</button>
+        <p style="margin-top: 40px; color: #555; letter-spacing: 2px;">READY TO DOMINATE?</p>
     </div>
 
-    <div id="game-screen" class="screen">
-        <div class="header">
-            <button class="btn-home" onclick="goHome()">Exit</button>
-            <div id="game-title">GAME</div>
-            <div style="color:var(--gold)">🪙 <span id="game-coins">0</span></div>
-        </div>
+    <div class="header">
+        <div style="font-weight:bold; color:var(--neon-blue);">SADAF HUB</div>
+        <button class="btn-smart" style="border-color: var(--gold); color: var(--gold);" onclick="openSpinner()">🎁 GIFT</button>
+    </div>
 
-        <div class="stats-bar">
-            <span>LEVEL: <span id="active-lvl">1</span> / 500</span>
-            <span id="target-info">Target: 100</span>
-        </div>
+    <div style="margin-top: 20px; font-size: 1.2rem;">🪙 <span id="pts" style="color:var(--gold)">0</span> Pts</div>
 
-        <div id="super-card" class="super-alert">✨ 2 SUPER CARDS ACTIVATED FOR THIS LEVEL!</div>
+    <div class="grid" id="board"></div>
 
-        <div id="canvas-wrap">
-            </div>
+    <div id="status" style="color: var(--neon-pink); font-weight: bold; margin-bottom: 20px;">YOUR TURN (O)</div>
+    <button class="btn-smart" onclick="resetGame()">RESTART MISSION</button>
 
-        <div class="footer-action">
-            <button id="next-btn" class="next-btn" onclick="nextLevel()">CLAIM VICTORY</button>
-            <p id="hint-text" style="color:#666; font-size: 0.8rem;">Win the level to progress</p>
-        </div>
+    <div id="modal-spinner" class="modal">
+        <h2 style="color:var(--gold)">DAILY REWARD</h2>
+        <div id="wheel" style="font-size: 4rem; margin: 30px 0;">🎁</div>
+        <button id="spin-btn" class="btn-smart" style="border-color: var(--gold); width: 200px;" onclick="startSpin()">SPIN NOW</button>
+        <div id="timer" style="margin-top: 20px; color: var(--neon-pink); font-family: monospace;"></div>
+        <button class="btn-smart" style="margin-top: 40px; border-color: white;" onclick="closeSpinner()">BACK</button>
     </div>
 
     <script>
-        // --- GAME DATA & STATE ---
-        let data = {
-            points: parseInt(localStorage.getItem('s_pts')) || 100,
-            candyLvl: parseInt(localStorage.getItem('s_clvl')) || 1,
-            bubbleLvl: parseInt(localStorage.getItem('s_blvl')) || 1,
-            tttLvl: 1,
-            activeGame: ''
-        };
+        let board = Array(25).fill(null);
+        let pts = parseInt(localStorage.getItem('sadaf_pts')) || 100;
+        let active = true;
 
-        const candyIcons = ['🍭', '🍬', '🍩', '🍫', '🧁', '🍪', '💎'];
-        let selectedCandy = null;
-        let candyBoard = [];
-
-        function updateStorage() {
-            localStorage.setItem('s_pts', data.points);
-            localStorage.setItem('s_clvl', data.candyLvl);
-            localStorage.setItem('s_blvl', data.bubbleLvl);
-            document.getElementById('total-coins').innerText = data.points;
-            document.getElementById('game-coins').innerText = data.points;
-            document.getElementById('clvl-tag').innerText = data.candyLvl;
-            document.getElementById('blvl-tag').innerText = data.bubbleLvl;
+        function updateUI() {
+            document.getElementById('pts').innerText = pts;
+            localStorage.setItem('sadaf_pts', pts);
         }
 
-        function goHome() {
-            document.getElementById('lobby').style.display = 'flex';
-            document.getElementById('game-screen').style.display = 'none';
-            updateStorage();
+        function enterGame() {
+            const screen = document.getElementById('preview-screen');
+            screen.style.opacity = '0';
+            screen.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                screen.style.display = 'none';
+                createBoard();
+                updateUI();
+                checkTimer();
+            }, 800);
         }
 
-        function setupGame(title, lvl, target) {
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'flex';
-            document.getElementById('game-title').innerText = title;
-            document.getElementById('active-lvl').innerText = lvl;
-            document.getElementById('target-info').innerText = "Target: " + target;
-            document.getElementById('next-btn').style.display = 'none';
-            document.getElementById('hint-text').style.display = 'block';
-            
-            // Super Card Logic every 10 levels
-            document.getElementById('super-card').style.display = (lvl % 10 === 0) ? 'block' : 'none';
-        }
-
-        // --- 1. SODA CRUSH ENGINE (Match-3) ---
-        function initCandy() {
-            data.activeGame = 'candy';
-            setupGame("SODA CRUSH", data.candyLvl, "Match 3 Icons");
-            const wrap = document.getElementById('canvas-wrap');
-            wrap.innerHTML = '<div class="candy-grid" id="c-grid"></div>';
-            const grid = document.getElementById('c-grid');
-            
-            candyBoard = [];
-            // Difficulty increases colors
-            const colorCount = Math.min(candyIcons.length, 3 + Math.floor(data.candyLvl / 50));
-            
-            for(let i=0; i<49; i++) {
-                let icon = candyIcons[Math.floor(Math.random() * colorCount)];
-                candyBoard.push(icon);
+        function createBoard() {
+            const el = document.getElementById('board');
+            el.innerHTML = '';
+            board.forEach((_, i) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.id = 'c-' + i;
-                cell.innerText = icon;
-                cell.onclick = () => handleCandy(i);
-                grid.appendChild(cell);
-            }
-        }
-
-        function handleCandy(i) {
-            if(selectedCandy === null) {
-                selectedCandy = i;
-                document.getElementById('c-'+i).classList.add('selected');
-            } else {
-                let cell1 = document.getElementById('c-'+selectedCandy);
-                let cell2 = document.getElementById('c-'+i);
-                
-                // Swap
-                let temp = candyBoard[selectedCandy];
-                candyBoard[selectedCandy] = candyBoard[i];
-                candyBoard[i] = temp;
-                
-                cell1.innerText = candyBoard[selectedCandy];
-                cell2.innerText = candyBoard[i];
-                cell1.classList.remove('selected');
-                
-                checkCandyMatch();
-                selectedCandy = null;
-            }
-        }
-
-        function checkCandyMatch() {
-            let matched = false;
-            // Simplified match check for demo, can be expanded
-            for(let i=0; i<49; i++) {
-                if(i % 7 < 5 && candyBoard[i] === candyBoard[i+1] && candyBoard[i] === candyBoard[i+2]) matched = true;
-            }
-            if(matched) {
-                data.points += 20;
-                confetti({ particleCount: 50, spread: 40 });
-                updateStorage();
-                showVictory();
-            }
-        }
-
-        // --- 2. BATTLE HUB 5X5 ENGINE (Hard AI) ---
-        let tttBoard = [];
-        function initTTT() {
-            data.activeGame = 'ttt';
-            setupGame("BATTLE HUB 5X5", "PRO", "Win vs AI");
-            const wrap = document.getElementById('canvas-wrap');
-            wrap.innerHTML = '<div class="ttt-grid" id="t-grid"></div>';
-            const grid = document.getElementById('t-grid');
-            tttBoard = Array(25).fill(null);
-            
-            for(let i=0; i<25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'ttt-cell';
-                cell.id = 't-' + i;
+                cell.id = `c-${i}`;
                 cell.onclick = () => {
-                    if(!tttBoard[i]) {
-                        tttBoard[i] = 'O';
-                        renderTTT();
-                        if(checkWinTTT('O')) { showVictory(); data.points += 50; }
-                        else { setTimeout(tttAI, 500); }
+                    if(!active || board[i]) return;
+                    board[i] = 'O'; cell.innerText = 'O'; cell.style.color = 'var(--neon-blue)';
+                    if(checkWin('O')) { confetti(); pts += 20; updateUI(); active = false; document.getElementById('status').innerText = "MISSION PASSED!"; }
+                    else {
+                        active = false; document.getElementById('status').innerText = "AI THINKING...";
+                        setTimeout(aiMove, 600);
                     }
                 };
-                grid.appendChild(cell);
+                el.appendChild(cell);
+            });
+        }
+
+        function aiMove() {
+            let m = board.indexOf(null); 
+            if(m !== -1) {
+                board[m] = 'X'; 
+                const c = document.getElementById(`c-${m}`);
+                c.innerText = 'X'; c.style.color = 'var(--neon-pink)';
+                if(checkWin('X')) { document.getElementById('status').innerText = "MISSION FAILED!"; active = false; }
+                else { active = true; document.getElementById('status').innerText = "YOUR TURN (O)"; }
             }
         }
 
-        function tttAI() {
-            let move = findBestMove('X') || findBestMove('O');
-            if(move === null) {
-                let free = tttBoard.map((v,i)=> v===null?i:null).filter(v=> v!==null);
-                move = free[Math.floor(Math.random()*free.length)];
-            }
-            if(move !== undefined) {
-                tttBoard[move] = 'X';
-                renderTTT();
-                if(checkWinTTT('X')) { alert("AI Won! Try again."); initTTT(); }
-            }
-        }
-
-        function findBestMove(p) {
-            for(let i=0; i<25; i++) {
-                if(!tttBoard[i]) {
-                    tttBoard[i] = p;
-                    if(checkWinTTT(p)) { tttBoard[i]=null; return i; }
-                    tttBoard[i] = null;
-                }
-            }
-            return null;
-        }
-
-        function checkWinTTT(p) {
-            for(let i=0; i<25; i++) {
-                if(tttBoard[i] !== p) continue;
+        function checkWin(p) {
+            for (let i = 0; i < 25; i++) {
+                if (board[i] !== p) continue;
                 let r = Math.floor(i/5), c = i%5;
-                if(c < 3 && tttBoard[i+1]===p && tttBoard[i+2]===p) return true;
-                if(r < 3 && tttBoard[i+5]===p && tttBoard[i+10]===p) return true;
+                if (c < 3 && board[i+1]===p && board[i+2]===p) return true;
+                if (r < 3 && board[i+5]===p && board[i+10]===p) return true;
             }
             return false;
         }
 
-        function renderTTT() {
-            tttBoard.forEach((v,i) => {
-                const cell = document.getElementById('t-'+i);
-                cell.innerText = v || '';
-                cell.style.color = v === 'X' ? 'var(--pink)' : 'var(--neon)';
-            });
-        }
+        function openSpinner() { document.getElementById('modal-spinner').style.display = 'flex'; checkTimer(); }
+        function closeSpinner() { document.getElementById('modal-spinner').style.display = 'none'; }
 
-        // --- 3. BUBBLE SHOOTER ENGINE (Physics) ---
-        function initBubble() {
-            data.activeGame = 'bubble';
-            setupGame("BUBBLE POP", data.bubbleLvl, "Clear Bubbles");
-            const wrap = document.getElementById('canvas-wrap');
-            wrap.innerHTML = '<canvas id="b-canvas" width="300" height="400"></canvas>';
-            const canvas = document.getElementById('b-canvas');
-            const ctx = canvas.getContext('2d');
-            
-            let bubbles = [];
-            let rows = 4 + Math.min(4, Math.floor(data.bubbleLvl / 40));
-            const colors = ['#00f2ff', '#ff0055', '#ffcc00', '#00ff00'];
-            
-            for(let i=0; i<rows; i++) {
-                for(let j=0; j<7; j++) {
-                    bubbles.push({ x: 30+j*40, y: 40+i*35, c: colors[Math.floor(Math.random()*colors.length)] });
+        function checkTimer() {
+            const last = localStorage.getItem('last_spin');
+            const btn = document.getElementById('spin-btn');
+            if(last) {
+                const diff = Date.now() - parseInt(last);
+                const day = 24 * 60 * 60 * 1000;
+                if(diff < day) {
+                    btn.disabled = true; btn.innerText = "LOCKED";
+                    const rem = day - diff;
+                    const h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
+                    document.getElementById('timer').innerText = `NEXT SPIN: ${h}:${m}:${s}`;
+                } else {
+                    btn.disabled = false; btn.innerText = "SPIN NOW";
+                    document.getElementById('timer').innerText = "REWARD READY!";
                 }
             }
-
-            function draw() {
-                ctx.clearRect(0,0,300,400);
-                bubbles.forEach(b => {
-                    ctx.fillStyle = b.c;
-                    ctx.beginPath(); ctx.arc(b.x, b.y, 15, 0, Math.PI*2); ctx.fill();
-                    ctx.strokeStyle = 'white'; ctx.stroke();
-                });
-                // Cannon
-                ctx.fillStyle = 'white';
-                ctx.fillRect(140, 370, 20, 30);
-            }
-            draw();
-
-            canvas.onclick = () => {
-                if(bubbles.length > 0) {
-                    bubbles.splice(Math.floor(Math.random()*bubbles.length), 1);
-                    data.points += 5; updateStorage(); draw();
-                    if(bubbles.length === 0) showVictory();
-                }
-            };
         }
 
-        // --- SYSTEM FUNCTIONS ---
-        function showVictory() {
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
-            document.getElementById('next-btn').style.display = 'block';
-            document.getElementById('hint-text').style.display = 'none';
+        function startSpin() {
+            pts += Math.floor(Math.random() * 41) + 10;
+            localStorage.setItem('last_spin', Date.now().toString());
+            updateUI(); confetti(); checkTimer();
+            alert("Congrats! Points Added.");
         }
 
-        function nextLevel() {
-            if(data.activeGame === 'candy') { data.candyLvl++; initCandy(); }
-            if(data.activeGame === 'bubble') { data.bubbleLvl++; initBubble(); }
-            if(data.activeGame === 'ttt') { initTTT(); }
-            updateStorage();
-        }
-
-        window.onload = () => {
-            updateStorage();
-        };
+        function resetGame() { board = Array(25).fill(null); active = true; document.getElementById('status').innerText = "YOUR TURN (O)"; createBoard(); }
     </script>
 </body>
 </html>
